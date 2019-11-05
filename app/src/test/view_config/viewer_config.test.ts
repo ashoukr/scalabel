@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { MouseEvent as ReactMouseEvent } from 'react'
 // import * as THREE from 'three'
 import * as action from '../../js/action/common'
 import { MOUSE_CORRECTION_FACTOR, moveCameraAndTarget } from '../../js/action/point_cloud'
@@ -57,7 +58,7 @@ test('Viewer Config 3d drag test', () => {
   const mouseDownEvent = new MouseEvent(
     'mousedown',
     { clientX: 0, clientY: 0, button: 2 }
-  )
+  ) as unknown as ReactMouseEvent<HTMLDivElement>
   viewerConfigUpdater.onMouseDown(mouseDownEvent)
 
   const mouseMoveEvent = new MouseEvent(
@@ -67,7 +68,7 @@ test('Viewer Config 3d drag test', () => {
       clientY: MOUSE_CORRECTION_FACTOR / 2,
       button: 2
     }
-  )
+  ) as unknown as ReactMouseEvent<HTMLDivElement>
   viewerConfigUpdater.onMouseMove(mouseMoveEvent)
 
   const mouseUpEvent = new MouseEvent(
@@ -77,7 +78,7 @@ test('Viewer Config 3d drag test', () => {
       clientY: MOUSE_CORRECTION_FACTOR / 2,
       button: 2
     }
-  )
+  ) as unknown as ReactMouseEvent<HTMLDivElement>
   viewerConfigUpdater.onMouseUp(mouseUpEvent)
 
   state = Session.getState()

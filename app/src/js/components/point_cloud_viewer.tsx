@@ -91,6 +91,8 @@ class PointCloudViewer extends Viewer<Props> {
       />
     )
 
+    console.log(this.display)
+
     if (this.display) {
       const displayRect = this.display.getBoundingClientRect()
       canvas = React.cloneElement(

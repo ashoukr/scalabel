@@ -9,6 +9,8 @@ import { ImageViewerConfigType, PointCloudViewerConfigType, State, ViewerConfigT
 import { Vector3D } from '../math/vector3d'
 import { SCROLL_ZOOM_RATIO } from './image'
 
+import React from 'react'
+
 /**
  * Static class for updating viewer config in response to UI events
  */
@@ -119,7 +121,7 @@ export default class ViewerConfigUpdater {
    * Handle mouse movement
    * @param e
    */
-  public onMouseMove (e: MouseEvent) {
+  public onMouseMove (e: React.MouseEvent) {
     if (!this._container || !this._viewerConfig) {
       return
     }
@@ -180,7 +182,7 @@ export default class ViewerConfigUpdater {
    * Handle mouse down
    * @param e
    */
-  public onMouseDown (e: MouseEvent) {
+  public onMouseDown (e: React.MouseEvent) {
     if (!this._container) {
       return
     }
@@ -200,7 +202,7 @@ export default class ViewerConfigUpdater {
    * Handle mouse up
    * @param e
    */
-  public onMouseUp (_e: MouseEvent) {
+  public onMouseUp (_e: React.MouseEvent) {
     this._mouseDown = false
   }
 
@@ -208,7 +210,7 @@ export default class ViewerConfigUpdater {
    * Handle double click
    * @param e
    */
-  public onDoubleClick (e: MouseEvent) {
+  public onDoubleClick (e: React.MouseEvent) {
     if (!this._container || !this._viewerConfig) {
       return
     }
@@ -260,7 +262,7 @@ export default class ViewerConfigUpdater {
    * Handle mouse wheel
    * @param _e
    */
-  public onWheel (e: WheelEvent) {
+  public onWheel (e: React.WheelEvent) {
     if (!this._viewerConfig) {
       return
     }

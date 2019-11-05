@@ -7,7 +7,7 @@ import { Component } from './component'
 import ImageViewer from './image_viewer'
 import Label2dViewer from './label2d_viewer'
 import Label3dViewer from './label3d_viewer'
-import MouseEventListeners from './mouse_event_listeners'
+// import MouseEventListeners from './mouse_event_listeners'
 import PlayerControl from './player_control'
 import PointCloudViewer from './point_cloud_viewer'
 
@@ -20,8 +20,6 @@ interface Props {
  * Canvas Viewer
  */
 class ViewerContainer extends Component<Props> {
-  /** Topmost div */
-  private _divRef: HTMLDivElement | null
   /** Moveable container */
   private _container: HTMLDivElement | null
   /** viewer config */
@@ -29,18 +27,18 @@ class ViewerContainer extends Component<Props> {
   /** Manage viewer config */
   private _viewerConfigUpdater: ViewerConfigUpdater
 
-  /** UI handler */
-  private _mouseDownHandler: (e: MouseEvent) => void
-  /** UI handler */
-  private _mouseUpHandler: (e: MouseEvent) => void
-  /** UI handler */
-  private _mouseMoveHandler: (e: MouseEvent) => void
-  /** UI handler */
-  private _mouseLeaveHandler: (e: MouseEvent) => void
-  /** UI handler */
-  private _doubleClickHandler: (e: MouseEvent) => void
-  /** UI handler */
-  private _wheelHandler: (e: WheelEvent) => void
+  // /** UI handler */
+  // private _mouseDownHandler: (e: MouseEvent) => void
+  // /** UI handler */
+  // private _mouseUpHandler: (e: MouseEvent) => void
+  // /** UI handler */
+  // private _mouseMoveHandler: (e: MouseEvent) => void
+  // /** UI handler */
+  // private _mouseLeaveHandler: (e: MouseEvent) => void
+  // /** UI handler */
+  // private _doubleClickHandler: (e: MouseEvent) => void
+  // /** UI handler */
+  // private _wheelHandler: (e: WheelEvent) => void
   /** UI handler */
   private _keyDownHandler: (e: KeyboardEvent) => void
   /** UI handler */
@@ -53,15 +51,19 @@ class ViewerContainer extends Component<Props> {
   constructor (props: Props) {
     super(props)
     this._container = null
-    this._divRef = null
     this._viewerConfigUpdater = new ViewerConfigUpdater()
 
-    this._mouseDownHandler = this.onMouseDown.bind(this)
-    this._mouseUpHandler = this.onMouseUp.bind(this)
-    this._mouseMoveHandler = this.onMouseMove.bind(this)
-    this._mouseLeaveHandler = this.onMouseLeave.bind(this)
-    this._doubleClickHandler = this.onDoubleClick.bind(this)
-    this._wheelHandler = this.onWheel.bind(this)
+    const state = Session.getState()
+    if (this.props.id in state.user.viewerConfigs) {
+      this._viewerConfig = state.user.viewerConfigs[this.props.id]
+    }
+
+    // this._mouseDownHandler = this.onMouseDown.bind(this)
+    // this._mouseUpHandler = this.onMouseUp.bind(this)
+    // this._mouseMoveHandler = this.onMouseMove.bind(this)
+    // this._mouseLeaveHandler = this.onMouseLeave.bind(this)
+    // this._doubleClickHandler = this.onDoubleClick.bind(this)
+    // this._wheelHandler = this.onWheel.bind(this)
     this._keyDownHandler = this.onKeyDown.bind(this)
     this._keyUpHandler = this.onKeyUp.bind(this)
   }
@@ -89,11 +91,6 @@ class ViewerContainer extends Component<Props> {
    * @return {React.Fragment} React fragment
    */
   public render () {
-    let rectDiv: DOMRect | ClientRect | null = null
-    if (this._divRef) {
-      rectDiv = this._divRef.getBoundingClientRect()
-    }
-
     const id = this.props.id
 
     const views: React.ReactElement[] = []
@@ -124,21 +121,14 @@ class ViewerContainer extends Component<Props> {
     }
 
     let viewsWithProps = views
-    if (rectDiv) {
-      viewsWithProps = React.Children.map(views, (view) => {
-        if (rectDiv) {
-          return React.cloneElement(view,
-            {
-              height: rectDiv.height,
-              width: rectDiv.width,
-              display: this._container
-            })
-        } else {
-          return React.cloneElement(view, { display: this._container })
+    viewsWithProps = React.Children.map(views, (view) => {
+      return React.cloneElement(view,
+        {
+          display: this._container
         }
-      }
       )
     }
+    )
 
     const playerControl = (<PlayerControl key='player-control'
       num_frames={Session.getState().task.items.length}
@@ -146,11 +136,6 @@ class ViewerContainer extends Component<Props> {
 
     return (
         <div
-          ref={(element) => {
-            if (element) {
-              this._divRef = element
-            }
-          }}
           style={{
             display: 'block', height: '100%',
             position: 'absolute',
@@ -173,15 +158,21 @@ class ViewerContainer extends Component<Props> {
               outline: 'none',
               width: 'calc(100% - 20px)'
             }}
+            onMouseDown={ (e) => this.onMouseDown(e) }
+            onMouseUp={ (e) => this.onMouseUp(e) }
+            onMouseMove={ (e) => this.onMouseMove(e) }
+            onMouseLeave={ (e) => this.onMouseLeave(e) }
+            onDoubleClick={ (e) => this.onDoubleClick(e) }
+            onWheel ={ (e) => this.onWheel(e) }
           >
-            <MouseEventListeners
+            {/* <MouseEventListeners
               onMouseDown={this._mouseDownHandler}
               onMouseMove={this._mouseMoveHandler}
               onMouseUp={this._mouseUpHandler}
               onMouseLeave={this._mouseLeaveHandler}
               onDblClick={this._doubleClickHandler}
               onWheel={this._wheelHandler}
-            />
+            /> */}
             {viewsWithProps}
           </div>
           { playerControl }
@@ -213,7 +204,7 @@ class ViewerContainer extends Component<Props> {
    * Handle mouse down
    * @param e
    */
-  private onMouseDown (e: MouseEvent) {
+  private onMouseDown (e: React.MouseEvent) {
     this._viewerConfigUpdater.onMouseDown(e)
   }
 
@@ -221,7 +212,7 @@ class ViewerContainer extends Component<Props> {
    * Handle mouse up
    * @param e
    */
-  private onMouseUp (e: MouseEvent) {
+  private onMouseUp (e: React.MouseEvent) {
     this._viewerConfigUpdater.onMouseUp(e)
   }
 
@@ -229,7 +220,7 @@ class ViewerContainer extends Component<Props> {
    * Handle mouse move
    * @param e
    */
-  private onMouseMove (e: MouseEvent) {
+  private onMouseMove (e: React.MouseEvent) {
     this._viewerConfigUpdater.onMouseMove(e)
   }
 
@@ -237,7 +228,7 @@ class ViewerContainer extends Component<Props> {
    * Handle double click
    * @param e
    */
-  private onDoubleClick (e: MouseEvent) {
+  private onDoubleClick (e: React.MouseEvent) {
     this._viewerConfigUpdater.onDoubleClick(e)
   }
 
@@ -245,7 +236,7 @@ class ViewerContainer extends Component<Props> {
    * Handle mouse leave
    * @param e
    */
-  private onMouseLeave (_e: MouseEvent) {
+  private onMouseLeave (_e: React.MouseEvent) {
     return
   }
 
@@ -253,7 +244,7 @@ class ViewerContainer extends Component<Props> {
    * Handle mouse wheel
    * @param e
    */
-  private onWheel (e: WheelEvent) {
+  private onWheel (e: React.WheelEvent) {
     this._viewerConfigUpdater.onWheel(e)
   }
 

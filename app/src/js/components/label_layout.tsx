@@ -5,6 +5,8 @@ import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
 import Session from '../common/session'
+import { makeLayout } from '../functional/states'
+import { LayoutType, ViewerConfigType } from '../functional/types'
 import { LayoutStyles } from '../styles/label'
 
 interface ClassType {
@@ -21,8 +23,10 @@ interface Props {
   leftSidebar1: any
   /** The bottom part of the left side bar */
   leftSidebar2?: any
-  /** The main div */
+  /** Main viewer */
   main: any
+  /** Assistant viewer */
+  assistant: any
   /** The bottom bar */
   bottomBar?: any
   /** The top part of the right side bar */
@@ -59,12 +63,20 @@ interface LayoutState {
 class LabelLayout extends React.Component<Props, State> {
   /** The state of the layout */
   public layoutState: LayoutState
+
+  /** redux layout state */
+  private _layout: LayoutType
+  /** redux viewer configs */
+  private _viewerConfigs: {[id: number]: ViewerConfigType}
+
   /**
    * @param {object} props
    */
   constructor (props: any) {
     super(props)
     this.layoutState = { left_size: 0, center_size: 0, right_size: 0 }
+    this._layout = makeLayout()
+    this._viewerConfigs = {}
     Session.subscribe(this.onStateUpdated.bind(this))
   }
 
@@ -73,6 +85,9 @@ class LabelLayout extends React.Component<Props, State> {
    */
   public onStateUpdated () {
     this.setState(this.layoutState)
+    const state = Session.getState()
+    this._layout = state.user.layout
+    this._viewerConfigs = state.user.viewerConfigs
   }
 
   /**
@@ -144,8 +159,12 @@ class LabelLayout extends React.Component<Props, State> {
    */
   public render () {
     const {titleBar, leftSidebar1, leftSidebar2, bottomBar,
-      main, rightSidebar1, rightSidebar2, classes} = this.props
-    const mainWithProps = React.cloneElement(main, {})
+      main, assistant, rightSidebar1, rightSidebar2, classes} = this.props
+    const mainWithProps = main
+    const assistantWithProps = (
+      this._layout.assistantViewerId >= 0 &&
+      this._viewerConfigs[this._layout.assistantViewerId].show
+    ) ? assistant : undefined
 
     const leftDefaultWidth = 200
     const leftMaxWidth = 300
@@ -160,6 +179,10 @@ class LabelLayout extends React.Component<Props, State> {
     const bottomMaxHeight = 300
     const bottomMinHeight = 180
 
+    const assistantViewMaxWidth = 800
+    const assistantViewMinWidth = 400
+    const assistantViewDefaultWidth = 600
+
     return (
         <React.Fragment>
           <CssBaseline />
@@ -167,34 +190,73 @@ class LabelLayout extends React.Component<Props, State> {
             {titleBar}
           </div>
           <main className={classes.main}>
-            {this.optionalSplit('vertical',
-
-              // left sidebar
-              this.optionalSplit('horizontal', leftSidebar1, leftSidebar2,
-                'leftSidebar1', 'leftSidebar2',
-                topMinHeight, topDefaultHeight, topMaxHeight,
-                'first'),
-
+            {
               this.optionalSplit('vertical',
-
-                // center
-                this.optionalSplit('horizontal', mainWithProps, bottomBar,
-                'main', 'bottomBar',
-                bottomMinHeight, bottomDefaultHeight, bottomMaxHeight,
-                'second', 'center'),
-
-                // right sidebar
-                this.optionalSplit('horizontal', rightSidebar1, rightSidebar2,
-                'rightSidebar1', 'rightSidebar2',
-                topMinHeight, topDefaultHeight, topMaxHeight),
-                'center', 'rightSidebar',
-                rightMinWidth, rightDefaultWidth, rightMaxWidth, 'second',
-                'right'
+                // left sidebar
+                this.optionalSplit('horizontal',
+                  leftSidebar1,
+                  leftSidebar2,
+                  'leftSidebar1',
+                  'leftSidebar2',
+                  topMinHeight,
+                  topDefaultHeight,
+                  topMaxHeight,
+                  'first'
                 ),
 
-                'leftSidebar', 'centerAndRightSidebar',
-                leftMinWidth, leftDefaultWidth, leftMaxWidth, 'first', 'left'
-              )}
+                this.optionalSplit('vertical',
+                  // center
+                  this.optionalSplit('horizontal',
+                    this.optionalSplit('vertical',
+                      mainWithProps,
+                      assistantWithProps,
+                      'mainView',
+                      'assistantView',
+                      assistantViewMinWidth,
+                      assistantViewDefaultWidth,
+                      assistantViewMaxWidth,
+                      'second',
+                      'right'
+                    ),
+                    bottomBar,
+                    'main',
+                    'bottomBar',
+                    bottomMinHeight,
+                    bottomDefaultHeight,
+                    bottomMaxHeight,
+                    'second',
+                    'center'
+                  ),
+
+                  // right sidebar
+                  this.optionalSplit('horizontal',
+                    rightSidebar1,
+                    rightSidebar2,
+                    'rightSidebar1',
+                    'rightSidebar2',
+                    topMinHeight,
+                    topDefaultHeight,
+                    topMaxHeight
+                  ),
+
+                  'center',
+                  'rightSidebar',
+                  rightMinWidth,
+                  rightDefaultWidth,
+                  rightMaxWidth,
+                  'second',
+                  'right'
+                ),
+
+                'leftSidebar',
+                'centerAndRightSidebar',
+                leftMinWidth,
+                leftDefaultWidth,
+                leftMaxWidth,
+                'first',
+                'left'
+              )
+            }
           </main>
           {/* End footer */}
         </React.Fragment>

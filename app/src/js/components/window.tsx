@@ -25,9 +25,9 @@ export class Window extends React.Component<Props> {
   constructor (props: Props) {
     super(props)
 
-    document.addEventListener('contextmenu', (e) => {
-      e.preventDefault()
-    }, false)
+    // document.addEventListener('contextmenu', (e) => {
+    //   e.preventDefault()
+    // }, false)
   }
 
   /**
@@ -58,7 +58,9 @@ export class Window extends React.Component<Props> {
         />
     )
 
-    const main = (<ViewerContainer id={1} />)
+    const main = (<ViewerContainer id={state.user.layout.mainViewerId} />)
+    const assistant =
+      (<ViewerContainer id={state.user.layout.assistantViewerId} />)
     const bottomBar = null
     const rightSidebar1 = null
     const rightSidebar2 = null
@@ -68,6 +70,7 @@ export class Window extends React.Component<Props> {
           leftSidebar1={leftSidebar1}
           bottomBar={bottomBar}
           main={main}
+          assistant={assistant}
           rightSidebar1={rightSidebar1}
           rightSidebar2={rightSidebar2}
         />

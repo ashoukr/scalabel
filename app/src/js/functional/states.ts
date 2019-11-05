@@ -261,7 +261,7 @@ export function makeTaskConfig (params: Partial<ConfigType> = {}): ConfigType {
  * @param {{}} params
  * @return {LayoutType}
  */
-function makeLayout (params: {} = {}): LayoutType {
+export function makeLayout (params: {} = {}): LayoutType {
   return {
     toolbarWidth: 200,
     maxViewerConfigId: 0,
