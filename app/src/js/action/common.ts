@@ -1,6 +1,6 @@
 import Session from '../common/session'
-import { LabelType, Select, ShapeType,
-  TaskType, ViewerConfigType } from '../functional/types'
+import { LabelType, LayoutType, Select,
+  ShapeType, TaskType, ViewerConfigType } from '../functional/types'
 import * as types from './types'
 
 /** init session */
@@ -282,6 +282,20 @@ export function changeViewerConfig (
     sessionId: Session.id,
     viewerId,
     config
+  }
+}
+
+/**
+ * Change view layout
+ * @param layout
+ */
+export function changeLayout (
+  layout: Partial<LayoutType>
+): types.ChangeLayoutAction {
+  return {
+    type: types.CHANGE_LAYOUT,
+    sessionId: Session.id,
+    layout
   }
 }
 

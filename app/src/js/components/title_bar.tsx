@@ -8,8 +8,10 @@ import { withStyles } from '@material-ui/core/styles/index'
 import Typography from '@material-ui/core/Typography'
 import _ from 'lodash'
 import React from 'react'
+import { changeViewerConfig } from '../action/common'
 import Session, { ConnectionStatus } from '../common/session'
 import Synchronizer from '../common/synchronizer'
+import { State } from '../functional/types'
 import { defaultAppBar } from '../styles/general'
 import { StatusMessageBox } from '../styles/label'
 import { Component } from './component'
@@ -86,7 +88,16 @@ interface Props {
 /**
  * turn assistant view on/off
  */
-function toggleAssistantView () {
+function toggleAssistantView (state: State) {
+  const assistantViewerId = state.user.layout.assistantViewerId
+  if (assistantViewerId in state.user.viewerConfigs) {
+    const config = _.cloneDeep(state.user.viewerConfigs[assistantViewerId])
+    config.show = !config.show
+    Session.dispatch(changeViewerConfig(
+      state.user.layout.assistantViewerId,
+      config
+    ))
+  }
   // Session.dispatch({type: types.TOGGLE_ASSISTANT_VIEW});
 }
 
@@ -132,7 +143,8 @@ class TitleBar extends Component<Props> {
       { title: 'Keyboard Usage', icon: fa.faQuestion },
       { title: 'Dashboard', href: dashboardLink, icon: fa.faList },
       {
-        title: 'Assistant View', onClick: toggleAssistantView,
+        title: 'Assistant View',
+        onClick: () => { toggleAssistantView(this.state) },
         icon: fa.faColumns
       }
     ]

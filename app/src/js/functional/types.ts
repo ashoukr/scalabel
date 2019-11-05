@@ -271,6 +271,10 @@ export interface LayoutType {
   maxViewerConfigId: number
   /** Assistant view ratio */
   assistantViewRatio: number
+  /** viewer id for main view */
+  mainViewerId: number
+  /** viewer id for assistant view */
+  assistantViewerId: number
 }
 
 export interface TaskStatus {

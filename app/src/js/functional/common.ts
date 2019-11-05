@@ -765,3 +765,16 @@ export function changeViewerConfig (
   }
   return state
 }
+
+/**
+ * Change global view layout
+ * @param state
+ * @param action
+ */
+export function changeLayout (
+  state: State, action: types.ChangeLayoutAction
+): State {
+  const newLayout = updateObject(state.user.layout, action.layout)
+  const newUser = updateObject(state.user, { layout: newLayout })
+  return updateObject(state, { user: newUser })
+}

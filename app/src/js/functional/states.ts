@@ -266,6 +266,8 @@ function makeLayout (params: {} = {}): LayoutType {
     toolbarWidth: 200,
     maxViewerConfigId: 0,
     assistantViewRatio: 0.3,
+    mainViewerId: -1,
+    assistantViewerId: -1,
     ...params
   }
 }

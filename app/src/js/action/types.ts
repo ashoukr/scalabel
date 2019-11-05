@@ -3,6 +3,7 @@
  */
 import {
   LabelType,
+  LayoutType,
   Select,
   ShapeType,
   TaskType,
@@ -28,6 +29,7 @@ export const MERGE_TRACKS = 'MERGE_TRACKS'
 // View Level
 export const ADD_VIEWER_CONFIG = 'ADD_VIEWER_CONFIG'
 export const CHANGE_VIEWER_CONFIG = 'CHANGE_VIEWER_CONFIG'
+export const CHANGE_LAYOUT = 'CHANGE_LAYOUT'
 
 export const TASK_ACTION_TYPES = [
   ADD_LABELS,
@@ -141,6 +143,11 @@ export interface ChangeViewerConfigAction extends BaseAction {
   viewerId: number
   /** configs to update */
   config: ViewerConfigType
+}
+
+export interface ChangeLayoutAction extends BaseAction {
+  /** new layout parameters */
+  layout: Partial<LayoutType>
 }
 
 export interface DeleteViewerConfigAction extends BaseAction {

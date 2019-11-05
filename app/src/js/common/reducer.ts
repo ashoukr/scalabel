@@ -53,6 +53,8 @@ export const reducer: Reducer<State> = (
       return common.changeViewerConfig(
         state, action as types.ChangeViewerConfigAction
       )
+    case types.CHANGE_LAYOUT:
+      return common.changeLayout(state, action as types.ChangeLayoutAction)
     default:
   }
   return state
