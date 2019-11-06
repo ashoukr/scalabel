@@ -98,37 +98,43 @@ class ViewerContainer extends Component<Props> {
       const config = this._viewerConfig
       switch (config.type) {
         case types.ViewerConfigType.IMAGE:
-          views.push(<ImageViewer key={'imageView'} display={null} id={id} />)
           views.push(
-            <Label2dViewer key={'label2dView'} display={null} id={id} />
+            <ImageViewer
+              key={`imageView${id}`} display={this._container} id={id}
+            />
+          )
+          views.push(
+            <Label2dViewer
+              key={`label2dView${id}`} display={this._container} id={id}
+            />
           )
           break
         case types.ViewerConfigType.POINT_CLOUD:
           views.push(
-            <PointCloudViewer key={'pointCloudView'} display={null} id={id} />
+            <PointCloudViewer
+              key={`pointCloudView${id}`} display={this._container} id={id}
+            />
           )
           views.push(
-            <Label3dViewer key={'label3dView'} display={null} id={id} />
+            <Label3dViewer
+              key={`label3dView${id}`} display={this._container} id={id}
+            />
           )
           break
         case types.ViewerConfigType.IMAGE_3D:
-          views.push(<ImageViewer key={'imageView'} display={null} id={id} />)
           views.push(
-            <Label3dViewer key={'label3dView'} display={null} id={id} />
+            <ImageViewer
+              key={`imageView${id}`} display={this._container} id={id}
+            />
+          )
+          views.push(
+            <Label3dViewer
+              key={`label3dView${id}`} display={this._container} id={id}
+            />
           )
           break
       }
     }
-
-    let viewsWithProps = views
-    viewsWithProps = React.Children.map(views, (view) => {
-      return React.cloneElement(view,
-        {
-          display: this._container
-        }
-      )
-    }
-    )
 
     const playerControl = (<PlayerControl key='player-control'
       num_frames={Session.getState().task.items.length}
@@ -144,9 +150,10 @@ class ViewerContainer extends Component<Props> {
         >
           <div
             ref={(element) => {
-              if (element) {
+              if (element && this._container !== element) {
                 this._container = element
                 this._viewerConfigUpdater.setContainer(this._container)
+                this.forceUpdate()
               }
             }}
             style={{
@@ -173,7 +180,7 @@ class ViewerContainer extends Component<Props> {
               onDblClick={this._doubleClickHandler}
               onWheel={this._wheelHandler}
             /> */}
-            {viewsWithProps}
+            {views}
           </div>
           { playerControl }
         </div >

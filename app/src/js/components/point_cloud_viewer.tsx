@@ -85,13 +85,11 @@ class PointCloudViewer extends Viewer<Props> {
 
     let canvas = (
       <canvas
-        key='point-cloud-canvas'
+        key={`point-cloud-canvas-${this.props.id}`}
         className={classes.point_cloud_canvas}
         ref={(ref) => { this.initializeRefs(ref) }}
       />
     )
-
-    console.log(this.display)
 
     if (this.display) {
       const displayRect = this.display.getBoundingClientRect()
@@ -130,7 +128,10 @@ class PointCloudViewer extends Viewer<Props> {
    * @param _state
    */
   protected updateState (_state: State) {
-    this.display = this.props.display
+    if (this.display !== this.props.display) {
+      this.display = this.props.display
+      this.forceUpdate()
+    }
   }
 
   /**

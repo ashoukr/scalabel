@@ -136,7 +136,7 @@ class Label3dViewer extends Viewer<Props> {
     const { classes } = this.props
 
     let canvas = (<canvas
-      key='label3d-canvas'
+      key={`label3d-canvas-${this.props.id}`}
       className={classes.label3d_canvas}
       ref={(ref) => { this.initializeRefs(ref) }}
       onMouseDown={(e) => { this.onMouseDown(e) }}

@@ -58,9 +58,13 @@ export class Window extends React.Component<Props> {
         />
     )
 
-    const main = (<ViewerContainer id={state.user.layout.mainViewerId} />)
-    const assistant =
-      (<ViewerContainer id={state.user.layout.assistantViewerId} />)
+    const main = (<ViewerContainer
+      id={state.user.layout.mainViewerId}
+      key='mainView'
+    />)
+    const assistant = (<ViewerContainer
+      id={state.user.layout.assistantViewerId} key='assistantView'
+    />)
     const bottomBar = null
     const rightSidebar1 = null
     const rightSidebar2 = null
@@ -73,6 +77,7 @@ export class Window extends React.Component<Props> {
           assistant={assistant}
           rightSidebar1={rightSidebar1}
           rightSidebar2={rightSidebar2}
+          key='labelLayout'
         />
     )
   }
