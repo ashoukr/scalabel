@@ -190,6 +190,8 @@ export interface DataSourceType {
   extrinsics: ExtrinsicsType
 }
 
+export interface DataSourceMapType { [id: number]: DataSourceType }
+
 export interface ItemType {
   /** The ID of the item */
   id: number
@@ -300,7 +302,7 @@ export interface TaskType {
   /** tracks */
   tracks: TrackMapType
   /** data sources */
-  dataSources: DataSourceType[]
+  dataSources: DataSourceMapType
 }
 
 export interface Select {
@@ -335,8 +337,8 @@ export interface UserType {
 }
 
 export interface ItemStatus {
-  /** whether this item is loaded in this session */
-  loaded: boolean
+  /** Whether data source in item is loaded */
+  dataSourceLoaded: {[id: number]: boolean}
 }
 
 /**
@@ -352,7 +354,7 @@ export interface SessionType {
   /** Start time */
   startTime: number
   /** item statuses */
-  items: ItemStatus[]
+  itemStatuses: ItemStatus[]
 }
 
 export interface State {

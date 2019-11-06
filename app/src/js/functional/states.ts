@@ -28,6 +28,7 @@ export function makeLabel (params: Partial<LabelType> = {}): LabelType {
   return _.cloneDeep<LabelType>({
     id: -1,
     item: -1,
+    dataSources: [],
     type: types.LabelTypeName.EMPTY,
     category: [],
     attributes: {},
@@ -177,7 +178,8 @@ export function makeItem (params: Partial<ItemType> = {}): ItemType {
   return {
     id: -1,
     index: 0,
-    url: '',
+    imageUrls: {},
+    pointCloudUrls: {},
     labels: {},
     shapes: {},
     timestamp: -1,
@@ -268,7 +270,7 @@ function makeUser (params: Partial<UserType>= {}): UserType {
  */
 export function makeItemStatus (params: Partial<ItemStatus>= {}): ItemStatus {
   return {
-    loaded: false,
+    dataSourceLoaded: {},
     ...params
   }
 }
@@ -282,7 +284,7 @@ function makeSession (params: Partial<SessionType>= {}): SessionType {
   return {
     id: '',
     startTime: 0,
-    items: [],
+    itemStatuses: [],
     ...params
   }
 }
@@ -313,6 +315,7 @@ export function makeTask (params: Partial<TaskType> = {}): TaskType {
     status: makeTaskStatus(),
     items: [],
     tracks: {},
+    dataSources: {},
     ...params
   }
 }
