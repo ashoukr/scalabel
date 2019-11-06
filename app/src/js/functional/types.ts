@@ -8,6 +8,8 @@ export interface LabelType {
   id: number
   /** The item index */
   item: number
+  /** Associated data sources */
+  dataSources: number[]
   /** type of the label */
   type: string
   /** The category ID */
@@ -52,6 +54,17 @@ export interface PolygonType {
 }
 
 export interface Vector3Type {
+  /** The x-coordinate */
+  x: number
+  /** The y-coordinate */
+  y: number
+  /** The z-coordinate */
+  z: number
+}
+
+export interface Vector4Type {
+  /** The w-coordinate */
+  w: number
   /** The x-coordinate */
   x: number
   /** The y-coordinate */
@@ -144,13 +157,48 @@ export interface PointCloudViewerConfigType extends ViewerConfigType {
 export interface Image3DViewerConfigType extends
   ImageViewerConfigType, PointCloudViewerConfigType {}
 
+export interface CameraIntrinsicsType {
+  /** focal length along x-axis */
+  fx: number
+  /** focal length along y-axis */
+  fy: number
+  /** focal center along x-axis */
+  cx: number
+  /** focal center along y-axis */
+  cy: number
+}
+
+export type IntrinsicsType = CameraIntrinsicsType
+
+export interface ExtrinsicsType {
+  /** rotation to data source frame */
+  rotation: Vector4Type
+  /** translation to data source frame */
+  translation: Vector3Type
+}
+
+export interface DataSourceType {
+  /** id */
+  id: number
+  /** name */
+  name: string
+  /** data type */
+  type: string
+  /** intrinsics */
+  intrinsics: IntrinsicsType
+  /** extrinsics */
+  extrinsics: ExtrinsicsType
+}
+
 export interface ItemType {
   /** The ID of the item */
   id: number
   /** The index of the item */
   index: number
-  /** The URL of the item */
-  url: string
+  /** Map between data source id and url */
+  imageUrls: {[id: number]: string}
+  /** Map between data source id and url */
+  pointCloudUrls: {[id: number]: string}
   /** Labels of the item */
   labels: { [key: number]: LabelType } // list of label
   /** shapes of the labels on this item */
@@ -251,6 +299,8 @@ export interface TaskType {
   items: ItemType[]
   /** tracks */
   tracks: TrackMapType
+  /** data sources */
+  dataSources: DataSourceType[]
 }
 
 export interface Select {
