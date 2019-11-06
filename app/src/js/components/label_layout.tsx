@@ -8,6 +8,7 @@ import Session from '../common/session'
 import { makeLayout } from '../functional/states'
 import { LayoutType, ViewerConfigType } from '../functional/types'
 import { LayoutStyles } from '../styles/label'
+import PlayerControl from './player_control'
 
 interface ClassType {
   /** title bar */
@@ -183,6 +184,36 @@ class LabelLayout extends React.Component<Props, State> {
     const assistantViewMinWidth = 400
     const assistantViewDefaultWidth = 600
 
+    const playerControl = (<PlayerControl key='player-control'
+      num_frames={Session.getState().task.items.length}
+    />)
+
+    const labelInterface = (
+      <div
+        style={{
+          display: 'block', height: '100%',
+          position: 'absolute',
+          outline: 'none', width: '100%', background: '#222222'
+        }}
+      >
+        {
+          this.optionalSplit(
+            'vertical',
+            mainWithProps,
+            assistantWithProps,
+            'mainView',
+            'assistantView',
+            assistantViewMinWidth,
+            assistantViewDefaultWidth,
+            assistantViewMaxWidth,
+            'second',
+            'right'
+          )
+        }
+        { playerControl }
+      </div >
+    )
+
     return (
         <React.Fragment>
           <CssBaseline />
@@ -207,17 +238,7 @@ class LabelLayout extends React.Component<Props, State> {
                 this.optionalSplit('vertical',
                   // center
                   this.optionalSplit('horizontal',
-                    this.optionalSplit('vertical',
-                      mainWithProps,
-                      assistantWithProps,
-                      'mainView',
-                      'assistantView',
-                      assistantViewMinWidth,
-                      assistantViewDefaultWidth,
-                      assistantViewMaxWidth,
-                      'second',
-                      'right'
-                    ),
+                    labelInterface,
                     bottomBar,
                     'main',
                     'bottomBar',

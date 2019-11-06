@@ -8,7 +8,6 @@ import ImageViewer from './image_viewer'
 import Label2dViewer from './label2d_viewer'
 import Label3dViewer from './label3d_viewer'
 // import MouseEventListeners from './mouse_event_listeners'
-import PlayerControl from './player_control'
 import PointCloudViewer from './point_cloud_viewer'
 
 interface Props {
@@ -27,18 +26,6 @@ class ViewerContainer extends Component<Props> {
   /** Manage viewer config */
   private _viewerConfigUpdater: ViewerConfigUpdater
 
-  // /** UI handler */
-  // private _mouseDownHandler: (e: MouseEvent) => void
-  // /** UI handler */
-  // private _mouseUpHandler: (e: MouseEvent) => void
-  // /** UI handler */
-  // private _mouseMoveHandler: (e: MouseEvent) => void
-  // /** UI handler */
-  // private _mouseLeaveHandler: (e: MouseEvent) => void
-  // /** UI handler */
-  // private _doubleClickHandler: (e: MouseEvent) => void
-  // /** UI handler */
-  // private _wheelHandler: (e: WheelEvent) => void
   /** UI handler */
   private _keyDownHandler: (e: KeyboardEvent) => void
   /** UI handler */
@@ -58,12 +45,6 @@ class ViewerContainer extends Component<Props> {
       this._viewerConfig = state.user.viewerConfigs[this.props.id]
     }
 
-    // this._mouseDownHandler = this.onMouseDown.bind(this)
-    // this._mouseUpHandler = this.onMouseUp.bind(this)
-    // this._mouseMoveHandler = this.onMouseMove.bind(this)
-    // this._mouseLeaveHandler = this.onMouseLeave.bind(this)
-    // this._doubleClickHandler = this.onDoubleClick.bind(this)
-    // this._wheelHandler = this.onWheel.bind(this)
     this._keyDownHandler = this.onKeyDown.bind(this)
     this._keyUpHandler = this.onKeyUp.bind(this)
   }
@@ -136,18 +117,7 @@ class ViewerContainer extends Component<Props> {
       }
     }
 
-    const playerControl = (<PlayerControl key='player-control'
-      num_frames={Session.getState().task.items.length}
-    />)
-
     return (
-        <div
-          style={{
-            display: 'block', height: '100%',
-            position: 'absolute',
-            outline: 'none', width: '100%', background: '#222222'
-          }}
-        >
           <div
             ref={(element) => {
               if (element && this._container !== element) {
@@ -158,12 +128,11 @@ class ViewerContainer extends Component<Props> {
             }}
             style={{
               display: 'block',
-              height: 'calc(100% - 20px)',
-              top: '10px', left: '10px',
+              height: '100%',
               position: 'absolute',
               overflow: 'hidden',
               outline: 'none',
-              width: 'calc(100% - 20px)'
+              width: '100%'
             }}
             onMouseDown={ (e) => this.onMouseDown(e) }
             onMouseUp={ (e) => this.onMouseUp(e) }
@@ -173,18 +142,8 @@ class ViewerContainer extends Component<Props> {
             onDoubleClick={ (e) => this.onDoubleClick(e) }
             onWheel ={ (e) => this.onWheel(e) }
           >
-            {/* <MouseEventListeners
-              onMouseDown={this._mouseDownHandler}
-              onMouseMove={this._mouseMoveHandler}
-              onMouseUp={this._mouseUpHandler}
-              onMouseLeave={this._mouseLeaveHandler}
-              onDblClick={this._doubleClickHandler}
-              onWheel={this._wheelHandler}
-            /> */}
             {views}
           </div>
-          { playerControl }
-        </div >
     )
   }
 
