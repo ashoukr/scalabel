@@ -168,6 +168,7 @@ class ViewerContainer extends Component<Props> {
             onMouseDown={ (e) => this.onMouseDown(e) }
             onMouseUp={ (e) => this.onMouseUp(e) }
             onMouseMove={ (e) => this.onMouseMove(e) }
+            onMouseEnter={ (e) => this.onMouseEnter(e) }
             onMouseLeave={ (e) => this.onMouseLeave(e) }
             onDoubleClick={ (e) => this.onDoubleClick(e) }
             onWheel ={ (e) => this.onWheel(e) }
@@ -243,6 +244,14 @@ class ViewerContainer extends Component<Props> {
    * Handle mouse leave
    * @param e
    */
+  private onMouseEnter (_e: React.MouseEvent) {
+    Session.activeViewerId = this.props.id
+  }
+
+  /**
+   * Handle mouse leave
+   * @param e
+   */
   private onMouseLeave (_e: React.MouseEvent) {
     return
   }
@@ -260,7 +269,9 @@ class ViewerContainer extends Component<Props> {
    * @param e
    */
   private onKeyUp (e: KeyboardEvent) {
-    this._viewerConfigUpdater.onKeyUp(e)
+    if (Session.activeViewerId === this.props.id) {
+      this._viewerConfigUpdater.onKeyUp(e)
+    }
   }
 
   /**
@@ -268,7 +279,9 @@ class ViewerContainer extends Component<Props> {
    * @param e
    */
   private onKeyDown (e: KeyboardEvent) {
-    this._viewerConfigUpdater.onKeyDown(e)
+    if (Session.activeViewerId === this.props.id) {
+      this._viewerConfigUpdater.onKeyDown(e)
+    }
   }
 }
 

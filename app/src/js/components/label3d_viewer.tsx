@@ -260,7 +260,7 @@ class Label3dViewer extends Viewer<Props> {
    * @param {KeyboardEvent} e
    */
   public onKeyDown (e: KeyboardEvent) {
-    if (this.checkFreeze()) {
+    if (this.checkFreeze() || Session.activeViewerId !== this.props.id) {
       return
     }
 
@@ -276,7 +276,7 @@ class Label3dViewer extends Viewer<Props> {
    * @param {KeyboardEvent} e
    */
   public onKeyUp (e: KeyboardEvent) {
-    if (this.checkFreeze()) {
+    if (this.checkFreeze() || Session.activeViewerId !== this.props.id) {
       return
     }
 
