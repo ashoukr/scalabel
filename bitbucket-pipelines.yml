@@ -1,0 +1,28 @@
+# This is a sample build configuration for JavaScript.
+# Check our guides at https://confluence.atlassian.com/x/14UWN for more examples.
+# Only use spaces to indent your .yml configuration.
+# -----
+# You can specify a custom docker image from Docker Hub as your build environment.
+image: ubuntu:18.04
+
+pipelines:
+  default:
+    - step:
+        name: Install Packages
+        script: # Modify the commands below to build your repository.
+          - apt-get update
+          - apt-get install -y npm python3-pip python3-setuptools build-essential
+            libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+          - npm install -g npm@latest
+          - sudo pip3 install --upgrade pip
+          - sudo pip3 install -r scripts/requirements.txt
+          - npm install canvas --build-from-source
+          - npm install
+    - step:
+        name: Build, Test, Lint
+        script:
+          - pylint scripts/
+          - node_modules/.bin/eslint .
+          - node_modules/.bin/tslint --project tsconfig.json --config tslint.json
+          - node_modules/.bin/npx webpack --config webpack.config.js --mode=production
+          - npm test
