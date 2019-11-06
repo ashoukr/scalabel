@@ -19,9 +19,9 @@ class Session {
   /** The store to save states */
   public store: Store<StateWithHistory<State>>
   /** Images of the session */
-  public images: HTMLImageElement[]
+  public images: Array<{[id: number]: HTMLImageElement}>
   /** Point cloud */
-  public pointClouds: THREE.Points[]
+  public pointClouds: Array<{[id: number]: THREE.Points}>
   /** map between track id and track objects */
   public tracks: {[trackId: number]: Track}
   /** Item type: image, point cloud */

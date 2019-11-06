@@ -66,11 +66,14 @@ export function changeSelect (
  * Create load item action
  */
 export function loadItem (
-    itemIndex: number): types.LoadItemAction {
+  itemIndex: number,
+  dataSourceId: number
+): types.LoadItemAction {
   return {
     type: types.LOAD_ITEM,
     sessionId: Session.id,
-    itemIndex
+    itemIndex,
+    dataSourceId
   }
 }
 
