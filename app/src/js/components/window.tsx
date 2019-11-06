@@ -25,9 +25,9 @@ export class Window extends React.Component<Props> {
   constructor (props: Props) {
     super(props)
 
-    // document.addEventListener('contextmenu', (e) => {
-    //   e.preventDefault()
-    // }, false)
+    document.addEventListener('contextmenu', (e) => {
+      e.preventDefault()
+    }, false)
   }
 
   /**
