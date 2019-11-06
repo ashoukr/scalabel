@@ -23,9 +23,10 @@ export const SCROLL_ZOOM_RATIO = 1.03
  * Get the current item in the state
  * @return {Size2D}
  */
-export function getCurrentImageSize (state: State): Size2D {
+export function getCurrentImageSize (state: State, viewerId: number): Size2D {
   const item = getCurrentItem(state)
-  const image = Session.images[item.index]
+  const dataSource = state.user.viewerConfigs[viewerId].dataSources[0]
+  const image = Session.images[item.index][dataSource]
   return new Size2D(image.width, image.height)
 }
 
@@ -192,7 +193,7 @@ export function updateCanvasScale (
 
   // resize canvas
   const item = getCurrentItem(state)
-  const image = Session.images[item.index]
+  const image = Session.images[item.index][config.dataSources[0]]
   const ratio = image.width / image.height
   let canvasHeight
   let canvasWidth

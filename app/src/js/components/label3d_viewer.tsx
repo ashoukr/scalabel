@@ -162,9 +162,12 @@ class Label3dViewer extends Viewer<Props> {
   public redraw (): boolean {
     const state = this.state
     const item = state.user.select.item
-    const loaded = state.session.items[item].loaded
-    if (loaded) {
-      if (this.canvas) {
+    if (this.canvas) {
+      const dataSource =
+        this.state.user.viewerConfigs[this.props.id].dataSources[0]
+      const loaded =
+        state.session.itemStatuses[item].dataSourceLoaded[dataSource]
+      if (loaded) {
         this.updateRenderer()
         this.renderThree()
       }
@@ -288,6 +291,8 @@ class Label3dViewer extends Viewer<Props> {
    */
   protected updateState (state: State): void {
     this.display = this.props.display
+    // Filter labels if not in layer
+    // this.camera.layers.set(this.props.id)
     this._labels.updateState(state, state.user.select.item, this.props.id)
   }
 

@@ -39,7 +39,16 @@ export function getShape (state: State, itemIndex: number,
  * @return boolean
  */
 export function isItemLoaded (state: State): boolean {
-  return state.session.items[state.user.select.item].loaded
+  const loadedMap =
+    state.session.itemStatuses[state.user.select.item].dataSourceLoaded
+
+  for (const loaded of Object.values(loadedMap)) {
+    if (!loaded) {
+      return false
+    }
+  }
+
+  return true
 }
 
 /**

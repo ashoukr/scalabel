@@ -128,6 +128,8 @@ export interface ViewerConfigType {
   type: string
   /** whether to show */
   show: boolean
+  /** which data sources to view */
+  dataSources: number[]
 }
 
 export interface ImageViewerConfigType extends ViewerConfigType {
@@ -236,8 +238,6 @@ export interface Attribute {
 export interface ConfigType {
   /** Project name */
   projectName: string
-  /** Item type */
-  itemType: string
   /** Label types available for the session */
   labelTypes: string[]
   /** Policy types available for session */

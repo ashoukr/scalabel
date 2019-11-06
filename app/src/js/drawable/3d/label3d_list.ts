@@ -68,22 +68,6 @@ export class Label3DList {
     this._labelChanged = false
     this._raycastableShapes = []
     this._control = new TransformationControl()
-    if (Session.itemType === 'image') {
-      let planeExists = false
-      const state = Session.getState()
-      const itemIndex = state.user.select.item
-      const item = state.task.items[itemIndex]
-      for (const key of Object.keys(item.labels)) {
-        if (item.labels[Number(key)].type === LabelTypeName.PLANE_3D) {
-          planeExists = true
-          break
-        }
-      }
-      if (!planeExists) {
-        this._plane = new Plane3D()
-        this._plane.init(state)
-      }
-    }
     this._keyDownMap = {}
     this._viewerId = -1
     this._state = Session.getState()

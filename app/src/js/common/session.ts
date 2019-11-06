@@ -24,8 +24,6 @@ class Session {
   public pointClouds: Array<{[id: number]: THREE.Points}>
   /** map between track id and track objects */
   public tracks: {[trackId: number]: Track}
-  /** Item type: image, point cloud */
-  public itemType: string
   /** whether tracking is enabled */
   public tracking: boolean
   /** whether track linking is enabled */
@@ -50,7 +48,6 @@ class Session {
     this.images = []
     this.pointClouds = []
     this.tracks = {}
-    this.itemType = ''
     this.tracking = true
     this.trackLinking = false
     this.currentPolicyType = ''
@@ -82,8 +79,7 @@ class Session {
    * Get the number of items in the current session
    */
   public get numItems (): number {
-    return (this.itemType === 'image') ? this.images.length :
-      this.pointClouds.length
+    return Math.max(this.images.length, this.pointClouds.length)
   }
 
   /**

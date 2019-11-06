@@ -7,7 +7,7 @@ import { sprintf } from 'sprintf-js'
 import * as THREE from 'three'
 import { addViewerConfig, initSessionAction, loadItem, updateAll } from '../action/common'
 import Window from '../components/window'
-import { makeImageViewerConfig, makePointCloudViewerConfig } from '../functional/states'
+import { makeDefaultViewerConfig } from '../functional/states'
 import { State } from '../functional/types'
 import { myTheme } from '../styles/theme'
 import { PLYLoader } from '../thirdparty/PLYLoader'
@@ -91,7 +91,6 @@ export function initStore (stateJson: {}, middleware?: Middleware): void {
   Session.store = configureStore(stateJson, Session.devMode, middleware)
   Session.dispatch(initSessionAction())
   const state = Session.getState()
-  Session.itemType = state.task.config.itemType
   Session.tracking = state.task.config.tracking
   Session.autosave = state.task.config.autosave
 }
@@ -102,14 +101,15 @@ export function initStore (stateJson: {}, middleware?: Middleware): void {
 function initViewerConfigs (): void {
   const state = Session.getState()
   if (Object.keys(state.user.viewerConfigs).length === 0) {
-    switch (state.task.config.itemType) {
-      case ItemType.IMAGE:
-        Session.dispatch(addViewerConfig(1, makeImageViewerConfig()))
-        break
-      case ItemType.POINT_CLOUD:
-        Session.dispatch(addViewerConfig(1, makePointCloudViewerConfig()))
-        break
-    }
+    const dataSourceIds = Object.keys(state.task.dataSources).map(
+      (key) => Number(key)
+    ).sort()
+    const firstId = dataSourceIds[0]
+    const firstDataSource = state.task.dataSources[firstId]
+    Session.dispatch(addViewerConfig(1, makeDefaultViewerConfig(
+      firstId,
+      firstDataSource.type as ItemType
+    )))
   }
 }
 
@@ -141,11 +141,8 @@ function setListeners () {
  * Load labeling data initialization function
  */
 function loadData (): void {
-  if (Session.itemType === 'image' || Session.itemType === 'video') {
-    loadImages()
-  } else if (Session.itemType === 'pointcloud') {
-    loadPointClouds()
-  }
+  loadImages()
+  loadPointClouds()
 }
 
 /**

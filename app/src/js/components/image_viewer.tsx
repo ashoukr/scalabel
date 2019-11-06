@@ -100,7 +100,9 @@ export class ImageViewer extends Viewer<Props> {
    */
   public redraw (): boolean {
     if (this.currentItemIsLoaded() && this.imageCanvas && this.imageContext) {
-      const image = Session.images[this.state.user.select.item]
+      const image = Session.images[this.state.user.select.item][
+        this.state.user.viewerConfigs[this.props.id].dataSources[0]
+      ]
       // redraw imageCanvas
       drawImageOnCanvas(this.imageCanvas, this.imageContext, image)
     }

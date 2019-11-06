@@ -142,7 +142,9 @@ export function makeIndexedShape (
  * Make a new viewer config
  * @return {ImageViewerConfigType}
  */
-export function makeImageViewerConfig (): ImageViewerConfigType {
+export function makeImageViewerConfig (
+  dataSources: number[]
+): ImageViewerConfigType {
   return {
     imageWidth: 0,
     imageHeight: 0,
@@ -150,7 +152,8 @@ export function makeImageViewerConfig (): ImageViewerConfigType {
     displayLeft: 0,
     displayTop: 0,
     show: true,
-    type: types.ViewerConfigType.IMAGE
+    type: types.ViewerConfigType.IMAGE,
+    dataSources
   }
 }
 
@@ -158,14 +161,34 @@ export function makeImageViewerConfig (): ImageViewerConfigType {
  * Make a new point cloud viewer config
  * @return {PointCloudViewerConfigType}
  */
-export function makePointCloudViewerConfig (): PointCloudViewerConfigType {
+export function makePointCloudViewerConfig (
+  dataSources: number[]
+): PointCloudViewerConfigType {
   return {
     position: { x: 0.0, y: 10.0, z: 0.0 },
     target: { x: 0.0, y: 0.0, z: 0.0 },
     verticalAxis: { x: 0.0, y: 0.0, z: 1.0 },
     lockStatus: 0,
     show: true,
-    type: types.ViewerConfigType.POINT_CLOUD
+    type: types.ViewerConfigType.POINT_CLOUD,
+    dataSources
+  }
+}
+
+/**
+ * Create default viewer config for item type
+ * @param dataSources
+ * @param type
+ */
+export function makeDefaultViewerConfig (
+  dataSource: number,
+  type: types.ItemType
+) {
+  switch (type) {
+    case types.ItemType.IMAGE:
+      return makeImageViewerConfig([dataSource])
+    case types.ItemType.POINT_CLOUD:
+      return makePointCloudViewerConfig([dataSource])
   }
 }
 
@@ -196,7 +219,6 @@ export function makeItem (params: Partial<ItemType> = {}): ItemType {
 export function makeTaskConfig (params: Partial<ConfigType> = {}): ConfigType {
   return {
     projectName: '',
-    itemType: '',
     labelTypes: [],
     policyTypes: [],
     taskSize: 0,

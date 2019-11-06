@@ -109,11 +109,14 @@ class PointCloudViewer extends Viewer<Props> {
   public redraw (): boolean {
     const state = this.state
     const item = state.user.select.item
-    const loaded = state.session.items[item].loaded
-    if (loaded) {
-      if (this.canvas) {
+    if (this.canvas) {
+      const dataSource =
+        this.state.user.viewerConfigs[this.props.id].dataSources[0]
+      const loaded =
+        state.session.itemStatuses[item].dataSourceLoaded[dataSource]
+      if (loaded) {
         this.updateRenderer()
-        this.pointCloud = Session.pointClouds[item]
+        this.pointCloud = Session.pointClouds[item][dataSource]
         this.renderThree()
       }
     }
