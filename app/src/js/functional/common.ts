@@ -33,11 +33,7 @@ export function initSession (state: State): State {
   const itemStatuses = session.itemStatuses.slice()
   for (let i = 0; i < itemStatuses.length; i++) {
     const loadedMap: {[id: number]: boolean} = {}
-    for (const key of Object.keys(items[i].imageUrls)) {
-      const dataSourceId = Number(key)
-      loadedMap[dataSourceId] = false
-    }
-    for (const key of Object.keys(items[i].pointCloudUrls)) {
+    for (const key of Object.keys(items[i].urls)) {
       const dataSourceId = Number(key)
       loadedMap[dataSourceId] = false
     }
@@ -527,7 +523,7 @@ export function loadItem (state: State, action: types.LoadItemAction): State {
     itemStatuses:
       updateListItem(session.itemStatuses, itemIndex,
         updateObject(session.itemStatuses[itemIndex], {
-          [action.dataSourceId]: false
+          [action.dataSourceId]: true
         })
       )
   })

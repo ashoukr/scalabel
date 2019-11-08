@@ -255,6 +255,12 @@ export function createProject (
     }
   })
 
+  const dataSources: {[id: number]: DataSourceType} = {}
+  if (itemType !== ItemTypeName.FUSION) {
+    // Make default data source for single data type labeling
+    dataSources[-1] = makeDataSource(-1, 'default', itemType)
+  }
+
   // With tracking, order by videoname lexicographically and split according
   // to videoname. It should be noted that a stable sort must be used to
   // maintain ordering provided in the image list file
@@ -319,22 +325,22 @@ function getCategoryMap (
   return categoryNameMap
 }
 
-/**
- * gets the max of values and currMax
- * @param values an array of numbers in string format
- */
-function getMax (values: string[], oldMax: number): number {
-  const numericValues = values.map((value: string) => {
-    return parseInt(value, 10)
-  })
-  let currMax = -1
-  if (numericValues.length > 0) {
-    currMax = numericValues.reduce((a, b) => {
-      return Math.max(a, b)
-    })
-  }
-  return Math.max(currMax, oldMax)
-}
+// /**
+//  * gets the max of values and currMax
+//  * @param values an array of numbers in string format
+//  */
+// function getMax (values: string[], oldMax: number): number {
+//   const numericValues = values.map((value: string) => {
+//     return parseInt(value, 10)
+//   })
+//   let currMax = -1
+//   if (numericValues.length > 0) {
+//     currMax = numericValues.reduce((a, b) => {
+//       return Math.max(a, b)
+//     })
+//   }
+//   return Math.max(currMax, oldMax)
+// }
 
 /**
  * Split project into tasks
@@ -344,12 +350,14 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
   // Filter invalid items, condition depends on whether labeling fusion data
   const items = (project.config.itemType === ItemTypeName.FUSION) ?
     project.items.filter((itemExport) =>
-      itemExport.dataType !== undefined ||
-      !itemExport.dataSource ||
-      !itemExport.timestamp
+      itemExport.dataType === undefined &&
+      itemExport.dataSource !== undefined &&
+      itemExport.timestamp !== undefined &&
+      itemExport.dataSource in project.dataSources
     ) :
     project.items.filter((itemExport) =>
-      !itemExport.dataType || itemExport.dataType === project.config.itemType
+      !itemExport.dataType ||
+      itemExport.dataType === project.config.itemType
     )
   let taskSize = project.config.taskSize
 
@@ -363,20 +371,24 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
   const dataSources: {[id: number]: DataSourceType} = project.dataSources
   if (project.config.itemType !== ItemTypeName.FUSION) {
     let maxDataSourceId =
-      Math.max(...Object.keys(dataSources).map((key) => Number(key))) + 1
+      Math.max(...Object.keys(dataSources).map((key) => Number(key)))
     for (const itemExport of items) {
       if (itemExport.dataType) {
-        dataSources[maxDataSourceId] = makeDataSource(
+        dataSources[maxDataSourceId + 1] = makeDataSource(
           maxDataSourceId,
           '',
           itemExport.dataType,
+          itemExport.sequenceName,
           itemExport.intrinsics,
           itemExport.extrinsics
         )
         itemExport.dataSource = maxDataSourceId
         itemExport.dataType = undefined
         maxDataSourceId++
-      } else if (itemExport.dataSource === undefined) {
+      } else if (
+        itemExport.dataSource === undefined ||
+        !(itemExport.dataSource in project.dataSources)
+      ) {
         itemExport.dataSource = -1
       }
     }
@@ -430,7 +442,7 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
       itemExportsByDataSource[dataSourceId] = _.sortBy(
         itemExportsByDataSource[dataSourceId],
         [(itemExport) => (itemExport.timestamp === undefined) ?
-          itemExport.timestamp : 0]
+          0 : itemExport.timestamp]
       )
       taskSize = Math.max(
         taskSize, itemExportsByDataSource[dataSourceId].length

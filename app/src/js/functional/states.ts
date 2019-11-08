@@ -151,10 +151,11 @@ export function makeDataSource (
   id: number,
   name: string,
   type: string,
+  sequenceName: string = '',
   intrinsics?: IntrinsicsType,
   extrinsics?: ExtrinsicsType
 ): DataSourceType {
-  return { id, name, type, intrinsics, extrinsics }
+  return { id, name, type, sequenceName, intrinsics, extrinsics }
 }
 
 /**
@@ -220,8 +221,8 @@ export function makeItem (params: Partial<ItemType> = {}): ItemType {
   return {
     id: -1,
     index: 0,
-    imageUrls: {},
-    pointCloudUrls: {},
+    sequenceName: '',
+    urls: {},
     labels: {},
     shapes: {},
     timestamp: -1,

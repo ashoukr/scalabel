@@ -85,8 +85,6 @@ export async function GetExportHandler (req: Request, res: Response) {
               timestamp: projectToLoad.config.submitTime,
               sequenceName: itemToLoad.sequenceName,
               attributes: {},
-              // do not index relative to task index when exporting
-              index: itemToLoad.id,
               labels: []
             })
           }

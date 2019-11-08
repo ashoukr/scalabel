@@ -153,19 +153,22 @@ function loadImages (): void {
   const items = state.task.items
   for (const item of items) {
     const itemImageMap: {[id: number]: HTMLImageElement} = {}
-    for (const key of Object.keys(item.imageUrls)) {
+    for (const key of Object.keys(item.urls)) {
       const dataSourceId = Number(key)
-      const url = item.imageUrls[dataSourceId]
-      const image = new Image()
-      image.crossOrigin = 'Anonymous'
-      image.onload = () => {
-        Session.dispatch(loadItem(item.index, dataSourceId))
+      if (dataSourceId in state.task.dataSources &&
+          state.task.dataSources[dataSourceId].type === DataType.IMAGE) {
+        const url = item.urls[dataSourceId]
+        const image = new Image()
+        image.crossOrigin = 'Anonymous'
+        image.onload = () => {
+          Session.dispatch(loadItem(item.index, dataSourceId))
+        }
+        image.onerror = () => {
+          alert(sprintf('Failed to load image at %s', url))
+        }
+        image.src = url
+        itemImageMap[dataSourceId] = image
       }
-      image.onerror = () => {
-        alert(sprintf('Failed to load image at %s', url))
-      }
-      image.src = url
-      itemImageMap[dataSourceId] = image
     }
     Session.images.push(itemImageMap)
   }
@@ -215,44 +218,47 @@ function loadPointClouds (): void {
   for (const item of items) {
     const pcImageMap: {[id: number]: THREE.Points} = {}
     Session.pointClouds.push(pcImageMap)
-    for (const key of Object.keys(item.pointCloudUrls)) {
+    for (const key of Object.keys(item.urls)) {
       const dataSourceId = Number(key)
-      const url = item.pointCloudUrls[dataSourceId]
-      loader.load(
-        url,
-        (geometry: THREE.BufferGeometry) => {
-          const material = new THREE.ShaderMaterial({
-            uniforms: {
-              red: {
-                value: new THREE.Color(0xff0000)
+      if (dataSourceId in state.task.dataSources &&
+          state.task.dataSources[dataSourceId].type === DataType.POINT_CLOUD) {
+        const url = item.urls[dataSourceId]
+        loader.load(
+          url,
+          (geometry: THREE.BufferGeometry) => {
+            const material = new THREE.ShaderMaterial({
+              uniforms: {
+                red: {
+                  value: new THREE.Color(0xff0000)
+                },
+                yellow: {
+                  value: new THREE.Color(0xffff00)
+                },
+                green: {
+                  value: new THREE.Color(0x00ff00)
+                },
+                teal: {
+                  value: new THREE.Color(0x00ffff)
+                }
               },
-              yellow: {
-                value: new THREE.Color(0xffff00)
-              },
-              green: {
-                value: new THREE.Color(0x00ff00)
-              },
-              teal: {
-                value: new THREE.Color(0x00ffff)
-              }
-            },
-            vertexShader,
-            fragmentShader,
-            alphaTest: 1.0
-          })
+              vertexShader,
+              fragmentShader,
+              alphaTest: 1.0
+            })
 
-          const particles = new THREE.Points(geometry, material)
-          Session.pointClouds[item.index][dataSourceId] = particles
+            const particles = new THREE.Points(geometry, material)
+            Session.pointClouds[item.index][dataSourceId] = particles
 
-          Session.dispatch(loadItem(item.index, dataSourceId))
-        },
+            Session.dispatch(loadItem(item.index, dataSourceId))
+          },
 
-        () => null,
+          () => null,
 
-        () => {
-          alert(`Point cloud at ${url} was not found.`)
-        }
-      )
+          () => {
+            alert(`Point cloud at ${url} was not found.`)
+          }
+        )
+      }
     }
   }
 }

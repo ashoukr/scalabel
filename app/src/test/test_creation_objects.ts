@@ -58,70 +58,70 @@ export const sampleItems: Array<Partial<ItemExport>> = [
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg',
-    videoName: 'a',
+    sequenceName: 'a',
     timestamp: 1568928550,
     index: 1
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg',
-    videoName: 'a',
+    sequenceName: 'a',
     timestamp: 1568928550,
     index: 2
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg',
-    videoName: 'a',
+    sequenceName: 'a',
     timestamp: 1568928550,
     index: 3
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg',
-    videoName: 'b',
+    sequenceName: 'b',
     timestamp: 1568928550,
     index: 4
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg',
-    videoName: 'b',
+    sequenceName: 'b',
     timestamp: 10000,
     index: 5
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg',
-    videoName: 'b',
+    sequenceName: 'b',
     timestamp: 10000,
     index: 6
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg',
-    videoName: 'b',
+    sequenceName: 'b',
     timestamp: 10000,
     index: 7
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg',
-    videoName: 'b',
+    sequenceName: 'b',
     timestamp: 10000,
     index: 8
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg',
-    videoName: 'b',
+    sequenceName: 'b',
     timestamp: 10000,
     index: 9
   },
   {
     name: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg',
     url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg',
-    videoName: 'b',
+    sequenceName: 'b',
     timestamp: 10000,
     index: 10
   }
@@ -272,7 +272,7 @@ export const sampleTasksImage: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 1568928550,
-        videoName: 'a'
+        sequenceName: 'a'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg',
@@ -281,7 +281,7 @@ export const sampleTasksImage: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 1568928550,
-        videoName: 'a'
+        sequenceName: 'a'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg',
@@ -290,7 +290,7 @@ export const sampleTasksImage: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 1568928550,
-        videoName: 'a'
+        sequenceName: 'a'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg',
@@ -299,7 +299,7 @@ export const sampleTasksImage: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 1568928550,
-        videoName: 'b'
+        sequenceName: 'b'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg',
@@ -308,7 +308,7 @@ export const sampleTasksImage: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 10000,
-        videoName: 'b'
+        sequenceName: 'b'
       }
     ],
     tracks: {}
@@ -347,7 +347,7 @@ export const sampleTasksImage: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 10000,
-        videoName: 'b'
+        sequenceName: 'b'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg',
@@ -356,7 +356,7 @@ export const sampleTasksImage: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 10000,
-        videoName: 'b'
+        sequenceName: 'b'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg',
@@ -365,7 +365,7 @@ export const sampleTasksImage: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 10000,
-        videoName: 'b'
+        sequenceName: 'b'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg',
@@ -374,7 +374,7 @@ export const sampleTasksImage: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 10000,
-        videoName: 'b'
+        sequenceName: 'b'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg',
@@ -383,7 +383,7 @@ export const sampleTasksImage: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 10000,
-        videoName: 'b'
+        sequenceName: 'b'
       }
     ],
     tracks: {}
@@ -425,7 +425,7 @@ export const sampleTasksVideo: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 1568928550,
-        videoName: 'a'
+        sequenceName: 'a'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg',
@@ -434,7 +434,7 @@ export const sampleTasksVideo: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 1568928550,
-        videoName: 'a'
+        sequenceName: 'a'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg',
@@ -443,7 +443,7 @@ export const sampleTasksVideo: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 1568928550,
-        videoName: 'a'
+        sequenceName: 'a'
       }
     ],
     tracks: {}
@@ -482,7 +482,7 @@ export const sampleTasksVideo: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 1568928550,
-        videoName: 'b'
+        sequenceName: 'b'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg',
@@ -491,7 +491,7 @@ export const sampleTasksVideo: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 10000,
-        videoName: 'b'
+        sequenceName: 'b'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg',
@@ -500,7 +500,7 @@ export const sampleTasksVideo: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 10000,
-        videoName: 'b'
+        sequenceName: 'b'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg',
@@ -509,7 +509,7 @@ export const sampleTasksVideo: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 10000,
-        videoName: 'b'
+        sequenceName: 'b'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg',
@@ -518,7 +518,7 @@ export const sampleTasksVideo: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 10000,
-        videoName: 'b'
+        sequenceName: 'b'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg',
@@ -527,7 +527,7 @@ export const sampleTasksVideo: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 10000,
-        videoName: 'b'
+        sequenceName: 'b'
       },
       {
         url: 'https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000111.jpg',
@@ -536,7 +536,7 @@ export const sampleTasksVideo: TaskType[] = [
         labels: {},
         shapes: {},
         timestamp: 10000,
-        videoName: 'b'
+        sequenceName: 'b'
       }
     ],
     tracks: {}
