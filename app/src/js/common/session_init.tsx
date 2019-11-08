@@ -15,7 +15,7 @@ import { configureStore } from './configure_store'
 import Session from './session'
 import { Synchronizer } from './synchronizer'
 import { makeTrackPolicy, Track } from './track'
-import { ItemType } from './types'
+import { DataType } from './types'
 
 /**
  * Request Session state from the server
@@ -108,7 +108,7 @@ function initViewerConfigs (): void {
     const firstDataSource = state.task.dataSources[firstId]
     Session.dispatch(addViewerConfig(1, makeDefaultViewerConfig(
       firstId,
-      firstDataSource.type as ItemType
+      firstDataSource.type as DataType
     )))
   }
 }

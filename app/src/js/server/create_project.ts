@@ -4,10 +4,10 @@ import * as yaml from 'js-yaml'
 import _ from 'lodash'
 import { ItemTypeName, LabelTypeName } from '../common/types'
 import { ItemExport } from '../functional/bdd_types'
-import { makeTask } from '../functional/states'
+import { makeDataSource, makeTask, makeTrack } from '../functional/states'
 import {
   Attribute, ConfigType,
-  ItemType, TaskStatus, TaskType } from '../functional/types'
+  DataSourceType, ItemType, TaskStatus, TaskType, TrackMapType } from '../functional/types'
 import { convertItemToImport } from './import'
 import Session from './server_session'
 import * as types from './types'
@@ -250,18 +250,19 @@ export function createProject (
   // ensure that all videonames are set to default if empty
   let projectItems = formFileData.items
   projectItems.forEach((itemExport) => {
-    if (itemExport.videoName === undefined) {
-      itemExport.videoName = ''
+    if (itemExport.sequenceName === undefined) {
+      itemExport.sequenceName = ''
     }
   })
 
   // With tracking, order by videoname lexicographically and split according
   // to videoname. It should be noted that a stable sort must be used to
   // maintain ordering provided in the image list file
-  projectItems = _.sortBy(projectItems, [(item) => item.videoName])
+  projectItems = _.sortBy(projectItems, [(item) => item.sequenceName])
   const project: types.Project = {
     config,
-    items: projectItems
+    items: projectItems,
+    dataSources: {}
   }
   return Promise.resolve(project)
 }
@@ -340,8 +341,17 @@ function getMax (values: string[], oldMax: number): number {
  * Each consists of the task portion of a frontend state
  */
 export function createTasks (project: types.Project): Promise<TaskType[]> {
-  const items = project.items
-  const taskSize = project.config.taskSize
+  // Filter invalid items, condition depends on whether labeling fusion data
+  const items = (project.config.itemType === ItemTypeName.FUSION) ?
+    project.items.filter((itemExport) =>
+      itemExport.dataType !== undefined ||
+      !itemExport.dataSource ||
+      !itemExport.timestamp
+    ) :
+    project.items.filter((itemExport) =>
+      !itemExport.dataType || itemExport.dataType === project.config.itemType
+    )
+  let taskSize = project.config.taskSize
 
   /* create quick lookup dicts for conversion from export type
    * to external type for attributes/categories
@@ -349,16 +359,41 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
   const [attributeNameMap, attributeValueMap] = getAttributeMaps(
     project.config.attributes)
   const categoryNameMap = getCategoryMap(project.config.categories)
+
+  const dataSources: {[id: number]: DataSourceType} = project.dataSources
+  if (project.config.itemType !== ItemTypeName.FUSION) {
+    let maxDataSourceId =
+      Math.max(...Object.keys(dataSources).map((key) => Number(key))) + 1
+    for (const itemExport of items) {
+      if (itemExport.dataType) {
+        dataSources[maxDataSourceId] = makeDataSource(
+          maxDataSourceId,
+          '',
+          itemExport.dataType,
+          itemExport.intrinsics,
+          itemExport.extrinsics
+        )
+        itemExport.dataSource = maxDataSourceId
+        itemExport.dataType = undefined
+        maxDataSourceId++
+      } else if (itemExport.dataSource === undefined) {
+        itemExport.dataSource = -1
+      }
+    }
+  }
+
   const tasks: TaskType[] = []
   // taskIndices contains each [start, stop) range for every task
   const taskIndices: number[] = []
+  const sequenceNames: string[] = []
   if (project.config.tracking) {
-    let prevVideoName: string
+    let prevSequenceName: string
     items.forEach((value, index) => {
-      if (value.videoName !== undefined) {
-        if (value.videoName !== prevVideoName) {
+      if (value.sequenceName !== undefined) {
+        if (value.sequenceName !== prevSequenceName) {
           taskIndices.push(index)
-          prevVideoName = value.videoName
+          prevSequenceName = value.sequenceName
+          sequenceNames.push(value.sequenceName)
         }
       }
     })
@@ -369,16 +404,48 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
   }
   taskIndices.push(items.length)
   let taskStartIndex: number
-  let taskEndIndex
+  let taskEndIndex: number
   for (let i = 0; i < taskIndices.length - 1; i ++) {
     taskStartIndex = taskIndices[i]
     taskEndIndex = taskIndices[i + 1]
-    const itemsExport = items.slice(taskStartIndex, taskEndIndex)
+    const taskItemsExport = items.slice(taskStartIndex, taskEndIndex)
+
+    // Map from data source id to list of item exports
+    const itemExportsByDataSource:
+      {[id: number]: Array<Partial<ItemExport>>} = {}
+    for (const itemExport of taskItemsExport) {
+      if (itemExport.dataSource !== undefined) {
+        if (!(itemExport.dataSource in itemExportsByDataSource)) {
+          itemExportsByDataSource[itemExport.dataSource] = []
+        }
+        itemExportsByDataSource[itemExport.dataSource].push(itemExport)
+      }
+    }
+
+    taskSize = 0
+    let largestDataSource = -1
+    const dataSourceMatchingIndices: {[id: number]: number} = {}
+    for (const key of Object.keys(itemExportsByDataSource)) {
+      const dataSourceId = Number(key)
+      itemExportsByDataSource[dataSourceId] = _.sortBy(
+        itemExportsByDataSource[dataSourceId],
+        [(itemExport) => (itemExport.timestamp === undefined) ?
+          itemExport.timestamp : 0]
+      )
+      taskSize = Math.max(
+        taskSize, itemExportsByDataSource[dataSourceId].length
+      )
+      if (taskSize === itemExportsByDataSource[dataSourceId].length) {
+        largestDataSource = dataSourceId
+      }
+      dataSourceMatchingIndices[dataSourceId] = 0
+    }
+
     /* assign task id,
      and update task size in case there aren't enough items */
     const config: ConfigType = {
       ...project.config,
-      taskSize: itemsExport.length,
+      taskSize,
       taskId: util.index2str(i)
     }
 
@@ -390,18 +457,59 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
 
     // convert from export format to internal format
     const itemsForTask: ItemType[] = []
-    for (let itemInd = 0; itemInd < itemsExport.length; itemInd += 1) {
+    const trackMap: TrackMapType = {}
+    for (let itemInd = 0; itemInd < taskSize; itemInd += 1) {
+      const timestampToMatch = itemExportsByDataSource[largestDataSource][
+        dataSourceMatchingIndices[largestDataSource]
+      ] as number
+      const itemExportMap: {[id: number]: Partial<ItemExport>} = {}
+      for (const key of Object.keys(dataSourceMatchingIndices)) {
+        const dataSourceId = Number(key)
+        let newIndex = dataSourceMatchingIndices[dataSourceId]
+        const itemExports = itemExportsByDataSource[dataSourceId]
+        while (newIndex < itemExports.length - 1 &&
+               Math.abs(itemExports[newIndex + 1].timestamp as number -
+                        timestampToMatch) <
+               Math.abs(itemExports[newIndex].timestamp as number -
+                        timestampToMatch)
+        ) {
+          newIndex++
+        }
+        dataSourceMatchingIndices[dataSourceId] = newIndex
+        itemExportMap[dataSourceId] = itemExports[newIndex]
+      }
+
       // id is not relative to task, unlike index
       const itemId = taskStartIndex + itemInd
-      const newItem = convertItemToImport(
-        itemsExport[itemInd], itemInd, itemId,
-        attributeNameMap, attributeValueMap, categoryNameMap)
+      const [newItem, newMaxLabelId, newMaxShapeId] = convertItemToImport(
+        sequenceNames[i],
+        itemExportMap,
+        itemInd,
+        itemId,
+        attributeNameMap,
+        attributeValueMap,
+        categoryNameMap,
+        maxLabelId,
+        maxShapeId,
+        project.config.tracking
+      )
 
-      maxLabelId = getMax(Object.keys(newItem.labels), maxLabelId)
-      maxShapeId = getMax(Object.keys(newItem.shapes), maxShapeId)
+      if (project.config.tracking) {
+        for (const label of Object.values(newItem.labels)) {
+          if (label.track >= 0 && !(label.track in trackMap)) {
+            trackMap[label.track] = makeTrack(label.track)
+          }
+          trackMap[label.track].labels[label.item] = label.id
+        }
+      }
+
+      maxLabelId = newMaxLabelId
+      maxShapeId = newMaxShapeId
       maxOrder += Object.keys(newItem.labels).length
 
       itemsForTask.push(newItem)
+
+      dataSourceMatchingIndices[largestDataSource]++
     }
 
     // update the num labels/shapes based on imports
@@ -415,7 +523,9 @@ export function createTasks (project: types.Project): Promise<TaskType[]> {
     const partialTask: Partial<TaskType> = {
       config,
       items: itemsForTask,
-      status: taskStatus
+      status: taskStatus,
+      dataSources,
+      tracks: trackMap
     }
     const task = makeTask(partialTask)
     tasks.push(task)

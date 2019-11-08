@@ -184,12 +184,14 @@ export interface DataSourceType {
   id: number
   /** name */
   name: string
+  /** sequence */
+  sequenceName: string
   /** data type */
   type: string
   /** intrinsics */
-  intrinsics: IntrinsicsType
+  intrinsics?: IntrinsicsType
   /** extrinsics */
-  extrinsics: ExtrinsicsType
+  extrinsics?: ExtrinsicsType
 }
 
 export interface DataSourceMapType { [id: number]: DataSourceType }
@@ -200,17 +202,15 @@ export interface ItemType {
   /** The index of the item */
   index: number
   /** Map between data source id and url */
-  imageUrls: {[id: number]: string}
-  /** Map between data source id and url */
-  pointCloudUrls: {[id: number]: string}
+  urls: {[id: number]: string}
   /** Labels of the item */
   labels: { [key: number]: LabelType } // list of label
   /** shapes of the labels on this item */
   shapes: { [key: number]: IndexedShapeType }
   /** the timestamp for the item */
   timestamp: number
-  /** the videoname for the item */
-  videoName: string
+  /** sequence item belongs to */
+  sequenceName: string
 }
 
 export interface Attribute {
@@ -238,6 +238,8 @@ export interface Attribute {
 export interface ConfigType {
   /** Project name */
   projectName: string
+  /** item type */
+  itemType: string
   /** Label types available for the session */
   labelTypes: string[]
   /** Policy types available for session */

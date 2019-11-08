@@ -2,8 +2,11 @@ import _ from 'lodash'
 import * as types from '../common/types'
 import {
   ConfigType, CubeType,
-  ImageViewerConfigType, IndexedShapeType,
-  ItemStatus, ItemType, LabelType, LayoutType,
+  DataSourceType, ExtrinsicsType,
+  ImageViewerConfigType, IndexedShapeType, IntrinsicsType, ItemStatus,
+  ItemType,
+  LabelType,
+  LayoutType,
   PathPoint2DType,
   Plane3DType,
   PointCloudViewerConfigType,
@@ -139,6 +142,22 @@ export function makeIndexedShape (
 }
 
 /**
+ * Create data source
+ * @param id
+ * @param type
+ * @param name
+ */
+export function makeDataSource (
+  id: number,
+  name: string,
+  type: string,
+  intrinsics?: IntrinsicsType,
+  extrinsics?: ExtrinsicsType
+): DataSourceType {
+  return { id, name, type, intrinsics, extrinsics }
+}
+
+/**
  * Make a new viewer config
  * @return {ImageViewerConfigType}
  */
@@ -182,12 +201,12 @@ export function makePointCloudViewerConfig (
  */
 export function makeDefaultViewerConfig (
   dataSource: number,
-  type: types.ItemType
+  type: types.DataType
 ) {
   switch (type) {
-    case types.ItemType.IMAGE:
+    case types.DataType.IMAGE:
       return makeImageViewerConfig([dataSource])
-    case types.ItemType.POINT_CLOUD:
+    case types.DataType.POINT_CLOUD:
       return makePointCloudViewerConfig([dataSource])
   }
 }
@@ -206,7 +225,6 @@ export function makeItem (params: Partial<ItemType> = {}): ItemType {
     labels: {},
     shapes: {},
     timestamp: -1,
-    videoName: '',
     ...params
   }
 }
@@ -219,6 +237,7 @@ export function makeItem (params: Partial<ItemType> = {}): ItemType {
 export function makeTaskConfig (params: Partial<ConfigType> = {}): ConfigType {
   return {
     projectName: '',
+    itemType: '',
     labelTypes: [],
     policyTypes: [],
     taskSize: 0,

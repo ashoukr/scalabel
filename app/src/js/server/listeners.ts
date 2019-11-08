@@ -77,11 +77,13 @@ export async function GetExportHandler (req: Request, res: Response) {
           // if state submission is not found, use an empty item
           Logger.info(err.message)
           for (const itemToLoad of task.items) {
+            const url = Object.values(itemToLoad.urls)[0]
             items.push({
-              name: itemToLoad.url,
-              url: itemToLoad.url,
-              videoName: itemToLoad.videoName,
+              name: url,
+              url,
+              dataSource: -1,
               timestamp: projectToLoad.config.submitTime,
+              sequenceName: itemToLoad.sequenceName,
               attributes: {},
               // do not index relative to task index when exporting
               index: itemToLoad.id,
@@ -118,11 +120,11 @@ export async function PostProjectHandler (req: Request, res: Response) {
       // create the project from the form data
       const project = await createProject(form, formFileData)
       await Promise.all([
-        // save the project
-        saveProject(project),
         // create tasks then save them
         createTasks(project).then(
-          (tasks: TaskType[]) => saveTasks(tasks))
+          (tasks: TaskType[]) => saveTasks(tasks)),
+        // save the project
+        saveProject(project)
       ])
       res.send()
     } catch (err) {
