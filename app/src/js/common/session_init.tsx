@@ -7,7 +7,7 @@ import { sprintf } from 'sprintf-js'
 import * as THREE from 'three'
 import { addViewerConfig, changeLayout, initSessionAction, loadItem, updateAll } from '../action/common'
 import Window from '../components/window'
-import { makeDefaultViewerConfig } from '../functional/states'
+import { makeDefaultViewerConfig, makePointCloudViewerConfig } from '../functional/states'
 import { State } from '../functional/types'
 import { myTheme } from '../styles/theme'
 import { PLYLoader } from '../thirdparty/PLYLoader'
@@ -15,7 +15,7 @@ import { configureStore } from './configure_store'
 import Session from './session'
 import { Synchronizer } from './synchronizer'
 import { makeTrackPolicy, Track } from './track'
-import { DataType } from './types'
+import { DataType, ItemTypeName } from './types'
 
 /**
  * Request Session state from the server
@@ -109,6 +109,13 @@ function initViewerConfigs (): void {
     Session.dispatch(addViewerConfig(1, makeDefaultViewerConfig(
       firstSensor.type as DataType
     )))
+    if (firstSensor.type === ItemTypeName.POINT_CLOUD) {
+      Session.dispatch(addViewerConfig(2, makePointCloudViewerConfig()))
+      Session.dispatch(changeLayout({
+        mainViewerId: 1,
+        assistantViewerId: 2
+      }))
+    }
   }
 }
 
