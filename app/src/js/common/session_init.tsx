@@ -5,9 +5,9 @@ import ReactDOM from 'react-dom'
 import { Middleware } from 'redux'
 import { sprintf } from 'sprintf-js'
 import * as THREE from 'three'
-import { addViewerConfig, changeLayout, initSessionAction, loadItem, updateAll } from '../action/common'
+import { addViewerConfig, initSessionAction, loadItem, updateAll } from '../action/common'
 import Window from '../components/window'
-import { makeDefaultViewerConfig, makePointCloudViewerConfig } from '../functional/states'
+import { makeDefaultViewerConfig } from '../functional/states'
 import { State } from '../functional/types'
 import { myTheme } from '../styles/theme'
 import { PLYLoader } from '../thirdparty/PLYLoader'
@@ -15,7 +15,7 @@ import { configureStore } from './configure_store'
 import Session from './session'
 import { Synchronizer } from './synchronizer'
 import { makeTrackPolicy, Track } from './track'
-import { DataType, ItemTypeName } from './types'
+import { DataType } from './types'
 
 /**
  * Request Session state from the server
@@ -106,16 +106,12 @@ function initViewerConfigs (): void {
     ).sort()
     const firstId = sensorIds[0]
     const firstSensor = state.task.sensors[firstId]
-    Session.dispatch(addViewerConfig(1, makeDefaultViewerConfig(
+    Session.dispatch(addViewerConfig(0, makeDefaultViewerConfig(
       firstSensor.type as DataType
     )))
-    if (firstSensor.type === ItemTypeName.POINT_CLOUD) {
-      Session.dispatch(addViewerConfig(2, makePointCloudViewerConfig()))
-      Session.dispatch(changeLayout({
-        mainViewerId: 1,
-        assistantViewerId: 2
-      }))
-    }
+    // Session.dispatch(changeLayout(
+    //   updateObject(state.user.layout, { rootPane: makePane(1) })
+    // ))
   }
 }
 

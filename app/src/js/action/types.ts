@@ -3,7 +3,6 @@
  */
 import {
   LabelType,
-  LayoutType,
   Select,
   ShapeType,
   TaskType,
@@ -143,11 +142,6 @@ export interface ChangeViewerConfigAction extends BaseAction {
   viewerId: number
   /** configs to update */
   config: ViewerConfigType
-}
-
-export interface ChangeLayoutAction extends BaseAction {
-  /** new layout parameters */
-  layout: Partial<LayoutType>
 }
 
 export interface DeleteViewerConfigAction extends BaseAction {

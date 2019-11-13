@@ -264,17 +264,36 @@ export interface ConfigType {
   autosave: boolean
 }
 
+export interface PaneType {
+  /** id of the pane */
+  id: number
+  /** If leaf, >= 0 */
+  viewerId: number
+  /** Current size in percentage, must be > 0 for non leaf  */
+  primarySize?: number
+  /** which child is primary */
+  primary?: 'first' | 'second'
+  /** Split type */
+  split?: 'vertical' | 'horizontal'
+  /** Min size */
+  minPrimarySize?: number
+  /** Max size */
+  maxPrimarySize?: number
+  /** First child if this is not leaf */
+  firstChild?: PaneType
+  /** Second child if this is not leaf */
+  secondChild?: PaneType
+}
+
 export interface LayoutType {
   /** Width of the tool bar */
   toolbarWidth: number
   /** max viewer config id */
   maxViewerConfigId: number
-  /** Assistant view ratio */
-  assistantViewRatio: number
-  /** viewer id for main view */
-  mainViewerId: number
-  /** viewer id for assistant view */
-  assistantViewerId: number
+  /** max viewer config id */
+  maxPaneId: number
+  /** top level pane node */
+  rootPane: PaneType
 }
 
 export interface TaskStatus {

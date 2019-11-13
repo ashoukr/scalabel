@@ -6,6 +6,7 @@ import {
   IndexedShapeType, IntrinsicsType, ItemStatus, ItemType,
   LabelType,
   LayoutType,
+  PaneType,
   PathPoint2DType,
   Plane3DType,
   PointCloudViewerConfigType,
@@ -257,6 +258,38 @@ export function makeTaskConfig (params: Partial<ConfigType> = {}): ConfigType {
 }
 
 /**
+ * Make pane node
+ * @param viewerId
+ * @param size
+ * @param split
+ * @param minSize
+ * @param maxSize
+ */
+export function makePane (
+  viewerId: number = -1,
+  paneId: number = -1,
+  primarySize?: number,
+  split?: 'vertical' | 'horizontal',
+  primary?: 'first' | 'second',
+  minPrimarySize?: number,
+  maxPrimarySize?: number,
+  firstChild?: PaneType,
+  secondChild?: PaneType
+): PaneType {
+  return {
+    id: paneId,
+    viewerId,
+    primary,
+    primarySize,
+    split,
+    minPrimarySize,
+    maxPrimarySize,
+    firstChild,
+    secondChild
+  }
+}
+
+/**
  * Initialize a Layout state
  * @param {{}} params
  * @return {LayoutType}
@@ -265,9 +298,8 @@ export function makeLayout (params: {} = {}): LayoutType {
   return {
     toolbarWidth: 200,
     maxViewerConfigId: 0,
-    assistantViewRatio: 0.3,
-    mainViewerId: -1,
-    assistantViewerId: -1,
+    maxPaneId: 0,
+    rootPane: makePane(0, 0),
     ...params
   }
 }

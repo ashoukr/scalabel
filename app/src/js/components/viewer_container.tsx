@@ -1,4 +1,10 @@
+import * as fa from '@fortawesome/free-solid-svg-icons/index'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { IconButton, TextField } from '@material-ui/core'
+import FormGroup from '@material-ui/core/FormGroup'
+import Grid from '@material-ui/core/Grid'
 import React from 'react'
+import SplitPane from 'react-split-pane'
 import Session from '../common/session'
 import * as types from '../common/types'
 import { ImageViewerConfigType, ViewerConfigType } from '../functional/types'
@@ -9,6 +15,11 @@ import Label2dViewer from './label2d_viewer'
 import Label3dViewer from './label3d_viewer'
 // import MouseEventListeners from './mouse_event_listeners'
 import PointCloudViewer from './point_cloud_viewer'
+
+/** Generate string to use for react component key */
+export function viewerContainerReactKey (id: number) {
+  return `viewerContainer${id}`
+}
 
 interface Props {
   /** id of the viewer, for referencing viewer config in state */
@@ -118,32 +129,100 @@ class ViewerContainer extends Component<Props> {
     }
 
     return (
-          <div
-            ref={(element) => {
-              if (element && this._container !== element) {
-                this._container = element
-                this._viewerConfigUpdater.setContainer(this._container)
-                this.forceUpdate()
+      <SplitPane
+        split={'horizontal'}
+        size={'60px'}
+        allowResize={false}
+      >
+        <Grid justify={'flex-end'} container>
+          <FormGroup row={true}>
+            <TextField
+              value={
+                (this._viewerConfig) ? this._viewerConfig.type :
+                  types.ViewerConfigType.UNKNOWN
               }
-            }}
-            style={{
-              display: 'block',
-              height: '100%',
-              position: 'absolute',
-              overflow: 'hidden',
-              outline: 'none',
-              width: '100%'
-            }}
-            onMouseDown={ (e) => this.onMouseDown(e) }
-            onMouseUp={ (e) => this.onMouseUp(e) }
-            onMouseMove={ (e) => this.onMouseMove(e) }
-            onMouseEnter={ (e) => this.onMouseEnter(e) }
-            onMouseLeave={ (e) => this.onMouseLeave(e) }
-            onDoubleClick={ (e) => this.onDoubleClick(e) }
-            onWheel ={ (e) => this.onWheel(e) }
-          >
-            {views}
-          </div>
+              select
+              label='Viewer Type'
+              // onChange={
+              //   this.handleItemTypeChange
+              // }
+              inputProps={{
+                'data-testid': 'viewer-type'
+              }}
+              SelectProps={{
+                native: true
+              }}
+            >
+              <option value={types.ViewerConfigType.IMAGE}>Image</option>
+              <option value={types.ViewerConfigType.POINT_CLOUD}>
+                Point Cloud
+              </option>
+              <option value={types.ViewerConfigType.IMAGE_3D}>Image 3D</option>
+            </TextField>
+            <TextField
+              value={
+                (this._viewerConfig) ? this._viewerConfig.sensor : null
+              }
+              select
+              label='Sensor'
+              // onChange={
+              //   this.handleItemTypeChange
+              // }
+              inputProps={{
+                'data-testid': 'sensor'
+              }}
+              SelectProps={{
+                native: true
+              }}
+            >
+              {Object.keys(this.state.task.sensors).filter((key) =>
+                (this._viewerConfig) ?
+                  this.state.task.sensors[Number(key)].type ===
+                    this._viewerConfig.type :
+                  false
+              ).map((key) =>
+                <option value={Number(key)}>{key}</option>
+              )}
+            </TextField>
+            <IconButton
+              data-testid={'split-vertical'}
+            >
+              <FontAwesomeIcon icon={fa.faColumns} size='xs'/>
+            </IconButton>
+            <IconButton
+              data-testid={'split-horizontal'}
+            >
+              <FontAwesomeIcon icon={fa.faColumns} size='xs' rotation={90}/>
+            </IconButton>
+          </FormGroup>
+        </Grid>
+        <div
+          ref={(element) => {
+            if (element && this._container !== element) {
+              this._container = element
+              this._viewerConfigUpdater.setContainer(this._container)
+              this.forceUpdate()
+            }
+          }}
+          style={{
+            display: 'block',
+            height: '100%',
+            position: 'absolute',
+            overflow: 'hidden',
+            outline: 'none',
+            width: '100%'
+          }}
+          onMouseDown={ (e) => this.onMouseDown(e) }
+          onMouseUp={ (e) => this.onMouseUp(e) }
+          onMouseMove={ (e) => this.onMouseMove(e) }
+          onMouseEnter={ (e) => this.onMouseEnter(e) }
+          onMouseLeave={ (e) => this.onMouseLeave(e) }
+          onDoubleClick={ (e) => this.onDoubleClick(e) }
+          onWheel ={ (e) => this.onWheel(e) }
+        >
+          {views}
+        </div>
+      </SplitPane>
     )
   }
 

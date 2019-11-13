@@ -6,8 +6,9 @@ import * as React from 'react'
 import SplitPane from 'react-split-pane'
 import Session from '../common/session'
 import { makeLayout } from '../functional/states'
-import { LayoutType, ViewerConfigType } from '../functional/types'
+import { LayoutType } from '../functional/types'
 import { LayoutStyles } from '../styles/label'
+import LabelPane from './label_pane'
 import PlayerControl from './player_control'
 
 interface ClassType {
@@ -24,10 +25,6 @@ interface Props {
   leftSidebar1: any
   /** The bottom part of the left side bar */
   leftSidebar2?: any
-  /** Main viewer */
-  main: any
-  /** Assistant viewer */
-  assistant: any
   /** The bottom bar */
   bottomBar?: any
   /** The top part of the right side bar */
@@ -67,8 +64,6 @@ class LabelLayout extends React.Component<Props, State> {
 
   /** redux layout state */
   private _layout: LayoutType
-  /** redux viewer configs */
-  private _viewerConfigs: {[id: number]: ViewerConfigType}
 
   /**
    * @param {object} props
@@ -77,7 +72,6 @@ class LabelLayout extends React.Component<Props, State> {
     super(props)
     this.layoutState = { left_size: 0, center_size: 0, right_size: 0 }
     this._layout = makeLayout()
-    this._viewerConfigs = {}
     Session.subscribe(this.onStateUpdated.bind(this))
   }
 
@@ -88,7 +82,6 @@ class LabelLayout extends React.Component<Props, State> {
     this.setState(this.layoutState)
     const state = Session.getState()
     this._layout = state.user.layout
-    this._viewerConfigs = state.user.viewerConfigs
   }
 
   /**
@@ -159,14 +152,15 @@ class LabelLayout extends React.Component<Props, State> {
    * @return {React.Fragment} React fragment
    */
   public render () {
-    const {titleBar, leftSidebar1, leftSidebar2, bottomBar,
-      main, assistant, rightSidebar1, rightSidebar2, classes} = this.props
-    const mainWithProps = main
-    const assistantWithProps = (
-      this._layout.assistantViewerId >= 0 &&
-      this._viewerConfigs[this._layout.assistantViewerId].show
-    ) ? assistant : undefined
-
+    const {
+      titleBar,
+      leftSidebar1,
+      leftSidebar2,
+      bottomBar,
+      rightSidebar1,
+      rightSidebar2,
+      classes
+    } = this.props
     const leftDefaultWidth = 200
     const leftMaxWidth = 300
     const leftMinWidth = 180
@@ -180,10 +174,6 @@ class LabelLayout extends React.Component<Props, State> {
     const bottomMaxHeight = 300
     const bottomMinHeight = 180
 
-    const assistantViewMaxWidth = 800
-    const assistantViewMinWidth = 400
-    const assistantViewDefaultWidth = 600
-
     const playerControl = (<PlayerControl key='player-control'
       num_frames={Session.getState().task.items.length}
     />)
@@ -196,20 +186,7 @@ class LabelLayout extends React.Component<Props, State> {
           outline: 'none', width: '100%', background: '#222222'
         }}
       >
-        {
-          this.optionalSplit(
-            'vertical',
-            mainWithProps,
-            assistantWithProps,
-            'mainView',
-            'assistantView',
-            assistantViewMinWidth,
-            assistantViewDefaultWidth,
-            assistantViewMaxWidth,
-            'second',
-            'right'
-          )
-        }
+        <LabelPane {...this._layout.rootPane} key={'rootPane'} />
         { playerControl }
       </div >
     )
