@@ -157,7 +157,7 @@ class PointCloudViewer extends Viewer<Props> {
     if (component.nodeName === 'CANVAS') {
       if (this.canvas && this.display) {
         const config = getCurrentViewerConfig(this.state, this.props.id)
-        if (config && config.type === types.ViewerConfigType.IMAGE_3D) {
+        if (config && config.type === types.ViewerConfigTypeName.IMAGE_3D) {
           if ((config as Image3DViewerConfigType).viewScale < MIN_SCALE ||
               (config as Image3DViewerConfigType).viewScale >= MAX_SCALE) {
             return

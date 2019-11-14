@@ -6,10 +6,10 @@
 import _ from 'lodash'
 import * as types from '../action/types'
 import { LabelTypeName } from '../common/types'
-import { makeIndexedShape, makeTrack } from './states'
+import { makeIndexedShape, makePane, makeTrack } from './states'
 import {
-  IndexedShapeType, ItemType, LabelType, Select, ShapeType, State,
-  TaskStatus, TaskType, TrackMapType, TrackType, UserType, ViewerConfigType
+  IndexedShapeType, ItemType, LabelType, PaneType, Select, ShapeType,
+  State, TaskStatus, TaskType, TrackMapType, TrackType, UserType, ViewerConfigType
 } from './types'
 import {
   assignToArray, getObjectKeys,
@@ -764,4 +764,109 @@ export function changeViewerConfig (
     )
   }
   return state
+}
+
+/**
+ * Recursively iterate through pane tree and split
+ * @param pane
+ */
+function recursivePaneUpdate (
+  pane: PaneType,
+  id: number,
+  updateFn: (pane: PaneType) => PaneType
+): PaneType {
+  // Terminate recursion at leaf
+  if (pane.viewerId >= 0) {
+    // Use updateFn to update pane
+    if (pane.id === id) {
+      return updateFn(pane)
+    }
+    return { ...pane }
+  }
+
+  pane = { ...pane }
+  if (pane.firstChild) {
+    pane = updateObject(pane, {
+      firstChild: recursivePaneUpdate(pane.firstChild, id, updateFn)
+    })
+  }
+
+  if (pane.secondChild) {
+    pane = updateObject(pane, {
+      secondChild: recursivePaneUpdate(pane.secondChild, id, updateFn)
+    })
+  }
+
+  return pane
+}
+
+/**
+ * Split existing pane into half
+ * @param state
+ * @param action
+ */
+export function splitPane (
+  state: State, action: types.SplitPaneAction
+) {
+  const firstPaneId = state.user.layout.maxPaneId + 1
+  const secondPaneId = state.user.layout.maxPaneId + 2
+
+  const oldViewerConfig = state.user.viewerConfigs[action.viewerConfig]
+  const newViewerConfig = _.cloneDeep(oldViewerConfig)
+  newViewerConfig.pane = secondPaneId
+  const newViewerConfigId = state.user.layout.maxViewerConfigId + 1
+
+  const newRootPane = recursivePaneUpdate(
+    state.user.layout.rootPane,
+    action.pane,
+    (pane: PaneType) => {
+      const firstChild = makePane(
+        pane.viewerId,
+        firstPaneId
+      )
+
+      const secondChild = makePane(
+        newViewerConfigId,
+        secondPaneId
+      )
+
+      return updateObject(pane, {
+        viewerId: -1,
+        split: action.split,
+        primarySize: 50,
+        firstChild,
+        secondChild
+      })
+    }
+  )
+
+  const newViewerConfigs = updateObject(
+    state.user.viewerConfigs,
+    {
+      [action.viewerConfig]: updateObject(
+        oldViewerConfig,
+        { pane: firstPaneId }
+      ),
+      [newViewerConfigId]: newViewerConfig
+    }
+  )
+
+  const newLayout = updateObject(
+    state.user.layout,
+    {
+      maxViewerConfigId: newViewerConfigId,
+      maxPaneId: secondPaneId,
+      rootPane: newRootPane
+    }
+  )
+
+  return updateObject(
+    state,
+    {
+      user: updateObject(
+        state.user,
+        { viewerConfigs: newViewerConfigs, layout: newLayout }
+      )
+    }
+  )
 }

@@ -16,6 +16,7 @@ import {
   SensorType,
   SessionType,
   ShapeType,
+  SplitType,
   State,
   TaskStatus,
   TaskType,
@@ -163,7 +164,7 @@ export function makeSensor (
  * @return {ImageViewerConfigType}
  */
 export function makeImageViewerConfig (
-  sensor: number = -1
+  pane: number, sensor: number = -1
 ): ImageViewerConfigType {
   return {
     imageWidth: 0,
@@ -172,8 +173,9 @@ export function makeImageViewerConfig (
     displayLeft: 0,
     displayTop: 0,
     show: true,
-    type: types.ViewerConfigType.IMAGE,
-    sensor
+    type: types.ViewerConfigTypeName.IMAGE,
+    sensor,
+    pane
   }
 }
 
@@ -182,7 +184,7 @@ export function makeImageViewerConfig (
  * @return {PointCloudViewerConfigType}
  */
 export function makePointCloudViewerConfig (
-  sensor: number = -1
+  pane: number, sensor: number = -1
 ): PointCloudViewerConfigType {
   return {
     position: { x: 0.0, y: 10.0, z: 0.0 },
@@ -190,8 +192,9 @@ export function makePointCloudViewerConfig (
     verticalAxis: { x: 0.0, y: 0.0, z: 1.0 },
     lockStatus: 0,
     show: true,
-    type: types.ViewerConfigType.POINT_CLOUD,
-    sensor
+    type: types.ViewerConfigTypeName.POINT_CLOUD,
+    sensor,
+    pane
   }
 }
 
@@ -201,13 +204,13 @@ export function makePointCloudViewerConfig (
  * @param type
  */
 export function makeDefaultViewerConfig (
-  type: types.DataType
+  type: types.DataType, pane: number = 0
 ) {
   switch (type) {
     case types.DataType.IMAGE:
-      return makeImageViewerConfig()
+      return makeImageViewerConfig(pane)
     case types.DataType.POINT_CLOUD:
-      return makePointCloudViewerConfig()
+      return makePointCloudViewerConfig(pane)
   }
 }
 
@@ -269,7 +272,7 @@ export function makePane (
   viewerId: number = -1,
   paneId: number = -1,
   primarySize?: number,
-  split?: 'vertical' | 'horizontal',
+  split?: SplitType,
   primary?: 'first' | 'second',
   minPrimarySize?: number,
   maxPrimarySize?: number,

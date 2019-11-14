@@ -5,6 +5,7 @@ import {
   LabelType,
   Select,
   ShapeType,
+  SplitType,
   TaskType,
   ViewerConfigType
 } from '../functional/types'
@@ -28,7 +29,7 @@ export const MERGE_TRACKS = 'MERGE_TRACKS'
 // View Level
 export const ADD_VIEWER_CONFIG = 'ADD_VIEWER_CONFIG'
 export const CHANGE_VIEWER_CONFIG = 'CHANGE_VIEWER_CONFIG'
-export const CHANGE_LAYOUT = 'CHANGE_LAYOUT'
+export const SPLIT_PANE = 'SPLIT_PANE'
 
 export const TASK_ACTION_TYPES = [
   ADD_LABELS,
@@ -149,6 +150,15 @@ export interface DeleteViewerConfigAction extends BaseAction {
   viewerId: number
 }
 
+export interface SplitPaneAction extends BaseAction {
+  /** ID of pane to split */
+  pane: number
+  /** ID of corresponding viewer config */
+  viewerConfig: number
+  /** Split direction */
+  split: SplitType
+}
+
 export type SessionActionType =
   InitSessionAction
   | LoadItemAction
@@ -159,6 +169,7 @@ export type UserActionType =
   ChangeSelectAction
   | ChangeViewerConfigAction
   | AddViewerConfigAction
+  | SplitPaneAction
 
 export type TaskActionType =
   AddLabelsAction

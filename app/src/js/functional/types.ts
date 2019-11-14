@@ -128,6 +128,8 @@ export interface ViewerConfigType {
   show: boolean
   /** which data sources to view */
   sensor: number
+  /** id of pane this belongs to */
+  pane: number
 }
 
 export interface ImageViewerConfigType extends ViewerConfigType {
@@ -264,6 +266,11 @@ export interface ConfigType {
   autosave: boolean
 }
 
+export enum SplitType {
+  HORIZONTAL = 'horizontal',
+  VERTICAL = 'vertical'
+}
+
 export interface PaneType {
   /** id of the pane */
   id: number
@@ -274,7 +281,7 @@ export interface PaneType {
   /** which child is primary */
   primary?: 'first' | 'second'
   /** Split type */
-  split?: 'vertical' | 'horizontal'
+  split?: SplitType
   /** Min size */
   minPrimarySize?: number
   /** Max size */

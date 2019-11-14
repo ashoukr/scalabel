@@ -131,7 +131,7 @@ export default class ViewerConfigUpdater {
     )
     if (this._mouseDown) {
       switch (this._viewerConfig.type) {
-        case types.ViewerConfigType.IMAGE:
+        case types.ViewerConfigTypeName.IMAGE:
           if (this.isKeyDown(types.Key.META) ||
               this.isKeyDown(types.Key.CONTROL)) {
             const dx = normalized[0] - this._mX
@@ -148,8 +148,8 @@ export default class ViewerConfigUpdater {
             ))
           }
           break
-        case types.ViewerConfigType.IMAGE_3D:
-        case types.ViewerConfigType.POINT_CLOUD:
+        case types.ViewerConfigTypeName.IMAGE_3D:
+        case types.ViewerConfigTypeName.POINT_CLOUD:
           if (this._mouseButton === 2) {
             this.updateCamera(this._viewerConfig as PointCloudViewerConfigType)
             Session.dispatch(dragCamera(
@@ -219,7 +219,7 @@ export default class ViewerConfigUpdater {
       e.clientX, e.clientY, this._container
     )
     switch (this._viewerConfig.type) {
-      case types.ViewerConfigType.POINT_CLOUD:
+      case types.ViewerConfigTypeName.POINT_CLOUD:
         this.updateCamera(this._viewerConfig as PointCloudViewerConfigType)
 
         const NDC = this.convertMouseToNDC(
@@ -268,7 +268,7 @@ export default class ViewerConfigUpdater {
     }
 
     switch (this._viewerConfig.type) {
-      case types.ViewerConfigType.IMAGE:
+      case types.ViewerConfigTypeName.IMAGE:
         if (this.isKeyDown(types.Key.META) ||
             this.isKeyDown(types.Key.CONTROL)) {
           e.preventDefault()
@@ -302,7 +302,7 @@ export default class ViewerConfigUpdater {
           }
         }
         break
-      case types.ViewerConfigType.POINT_CLOUD:
+      case types.ViewerConfigTypeName.POINT_CLOUD:
         const pointCloudZoomAction = zoomCamera(
           e.deltaY,
           this._viewerId,
@@ -328,7 +328,7 @@ export default class ViewerConfigUpdater {
     }
 
     switch (this._viewerConfig.type) {
-      case types.ViewerConfigType.POINT_CLOUD:
+      case types.ViewerConfigTypeName.POINT_CLOUD:
         this.pointCloudKeyEvents(e.key)
         break
     }

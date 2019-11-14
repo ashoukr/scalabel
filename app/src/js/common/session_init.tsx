@@ -107,7 +107,7 @@ function initViewerConfigs (): void {
     const firstId = sensorIds[0]
     const firstSensor = state.task.sensors[firstId]
     Session.dispatch(addViewerConfig(0, makeDefaultViewerConfig(
-      firstSensor.type as DataType
+      firstSensor.type as DataType, 0
     )))
     // Session.dispatch(changeLayout(
     //   updateObject(state.user.layout, { rootPane: makePane(1) })

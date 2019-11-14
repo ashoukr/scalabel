@@ -5,9 +5,10 @@ import FormGroup from '@material-ui/core/FormGroup'
 import Grid from '@material-ui/core/Grid'
 import React from 'react'
 import SplitPane from 'react-split-pane'
+import { splitPane } from '../action/common'
 import Session from '../common/session'
 import * as types from '../common/types'
-import { ImageViewerConfigType, ViewerConfigType } from '../functional/types'
+import { ImageViewerConfigType, SplitType, ViewerConfigType } from '../functional/types'
 import ViewerConfigUpdater from '../view_config/viewer_config'
 import { Component } from './component'
 import ImageViewer from './image_viewer'
@@ -89,7 +90,7 @@ class ViewerContainer extends Component<Props> {
     if (this._viewerConfig) {
       const config = this._viewerConfig
       switch (config.type) {
-        case types.ViewerConfigType.IMAGE:
+        case types.ViewerConfigTypeName.IMAGE:
           views.push(
             <ImageViewer
               key={`imageView${id}`} display={this._container} id={id}
@@ -101,7 +102,7 @@ class ViewerContainer extends Component<Props> {
             />
           )
           break
-        case types.ViewerConfigType.POINT_CLOUD:
+        case types.ViewerConfigTypeName.POINT_CLOUD:
           views.push(
             <PointCloudViewer
               key={`pointCloudView${id}`} display={this._container} id={id}
@@ -113,7 +114,7 @@ class ViewerContainer extends Component<Props> {
             />
           )
           break
-        case types.ViewerConfigType.IMAGE_3D:
+        case types.ViewerConfigTypeName.IMAGE_3D:
           views.push(
             <ImageViewer
               key={`imageView${id}`} display={this._container} id={id}
@@ -139,7 +140,7 @@ class ViewerContainer extends Component<Props> {
             <TextField
               value={
                 (this._viewerConfig) ? this._viewerConfig.type :
-                  types.ViewerConfigType.UNKNOWN
+                  types.ViewerConfigTypeName.UNKNOWN
               }
               select
               label='Viewer Type'
@@ -153,11 +154,13 @@ class ViewerContainer extends Component<Props> {
                 native: true
               }}
             >
-              <option value={types.ViewerConfigType.IMAGE}>Image</option>
-              <option value={types.ViewerConfigType.POINT_CLOUD}>
+              <option value={types.ViewerConfigTypeName.IMAGE}>Image</option>
+              <option value={types.ViewerConfigTypeName.POINT_CLOUD}>
                 Point Cloud
               </option>
-              <option value={types.ViewerConfigType.IMAGE_3D}>Image 3D</option>
+              <option value={types.ViewerConfigTypeName.IMAGE_3D}>
+                Image 3D
+              </option>
             </TextField>
             <TextField
               value={
@@ -186,11 +189,29 @@ class ViewerContainer extends Component<Props> {
             </TextField>
             <IconButton
               data-testid={'split-vertical'}
+              onClick={() => {
+                if (this._viewerConfig) {
+                  Session.dispatch(splitPane(
+                    this._viewerConfig.pane,
+                    SplitType.VERTICAL,
+                    this.props.id
+                  ))
+                }
+              }}
             >
               <FontAwesomeIcon icon={fa.faColumns} size='xs'/>
             </IconButton>
             <IconButton
               data-testid={'split-horizontal'}
+              onClick={() => {
+                if (this._viewerConfig) {
+                  Session.dispatch(splitPane(
+                    this._viewerConfig.pane,
+                    SplitType.HORIZONTAL,
+                    this.props.id
+                  ))
+                }
+              }}
             >
               <FontAwesomeIcon icon={fa.faColumns} size='xs' rotation={90}/>
             </IconButton>
@@ -235,10 +256,10 @@ class ViewerContainer extends Component<Props> {
     this._viewerConfig = viewerConfig
     if (viewerConfig && this._container) {
       const viewerType = viewerConfig.type
-      if (viewerType === types.ViewerConfigType.IMAGE ||
-          types.ViewerConfigType.IMAGE_3D) {
+      if (viewerType === types.ViewerConfigTypeName.IMAGE ||
+          types.ViewerConfigTypeName.IMAGE_3D) {
         this._container.scrollTop =
-          (viewerConfig as ImageViewerConfigType).displayTop
+        (viewerConfig as ImageViewerConfigType).displayTop
         this._container.scrollLeft =
           (viewerConfig as ImageViewerConfigType).displayLeft
       }

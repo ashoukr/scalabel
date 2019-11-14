@@ -36,7 +36,7 @@ class LabelPane extends React.Component<PaneType> {
     />)
 
     const secondChild = (<LabelPane
-      {...this.props.firstChild}
+      {...this.props.secondChild}
     />)
 
     return (
@@ -46,6 +46,7 @@ class LabelPane extends React.Component<PaneType> {
         maxSize={`${this.props.maxPrimarySize}%`}
         size={`${this.props.primarySize}%`}
         primary={this.props.primary}
+        allowResize
       >
         {firstChild}
         {secondChild}

@@ -26,7 +26,7 @@ function expectVector3TypesClose (v1: Vector3Type, v2: Vector3Type) {
 test('Viewer Config 3d drag test', () => {
   Session.devMode = false
   initStore(testJson)
-  Session.dispatch(action.addViewerConfig(1, makePointCloudViewerConfig()))
+  Session.dispatch(action.addViewerConfig(1, makePointCloudViewerConfig(-1)))
   const viewerId = 1
   const itemIndex = 0
   Session.dispatch(action.goToItem(itemIndex))
