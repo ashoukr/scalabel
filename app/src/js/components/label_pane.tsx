@@ -1,5 +1,7 @@
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
+import { updateAll } from '../action/common'
+import Session from '../common/session'
 import { PaneType } from '../functional/types'
 import ViewerContainer, { viewerContainerReactKey } from './viewer_container'
 
@@ -46,6 +48,7 @@ class LabelPane extends React.Component<PaneType> {
         maxSize={`${this.props.maxPrimarySize}%`}
         size={`${this.props.primarySize}%`}
         primary={this.props.primary}
+        onChange={() => Session.dispatch(updateAll())}
         allowResize
       >
         {firstChild}
