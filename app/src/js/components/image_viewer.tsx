@@ -113,7 +113,10 @@ export class ImageViewer extends Viewer<Props> {
    * notify state is updated
    */
   protected updateState (_state: State): void {
-    this.display = this.props.display
+    if (this.display !== this.props.display) {
+      this.display = this.props.display
+      this.forceUpdate()
+    }
   }
 
   /**
