@@ -787,12 +787,13 @@ function recursivePaneUpdate (
   id: number,
   updateFn: (pane: PaneType) => PaneType
 ): PaneType {
+  // Use updateFn to update pane
+  if (pane.id === id) {
+    return updateFn(pane)
+  }
+
   // Terminate recursion at leaf
   if (pane.viewerId >= 0) {
-    // Use updateFn to update pane
-    if (pane.id === id) {
-      return updateFn(pane)
-    }
     return { ...pane }
   }
 
@@ -819,7 +820,7 @@ function recursivePaneUpdate (
  */
 export function splitPane (
   state: State, action: types.SplitPaneAction
-) {
+): State {
   const firstPaneId = state.user.layout.maxPaneId + 1
   const secondPaneId = state.user.layout.maxPaneId + 2
 
@@ -881,4 +882,65 @@ export function splitPane (
       )
     }
   )
+}
+
+/** delete pane from state */
+export function deletePane (
+  state: State, action: types.DeletePaneAction
+): State {
+  console.log(action)
+  const searchQueue: PaneType[] = []
+  if (action.pane !== state.user.layout.rootPane.id) {
+    searchQueue.push(state.user.layout.rootPane)
+  }
+  console.log(state.user.layout.rootPane)
+  while (searchQueue.length > 0) {
+    const pane = searchQueue.pop() as PaneType
+    if (pane.viewerId >= 0 || !pane.firstChild || !pane.secondChild) {
+      continue
+    }
+
+    let newLeaf: PaneType | undefined
+    if (pane.firstChild.id === action.pane) {
+      newLeaf = pane.secondChild
+    } else if (pane.secondChild.id === action.pane) {
+      newLeaf = pane.firstChild
+    }
+
+    if (newLeaf) {
+      console.log(newLeaf)
+      const newRootPane = recursivePaneUpdate(
+        state.user.layout.rootPane,
+        pane.id,
+        (found: PaneType) => {
+          console.log('found', found)
+          return updateObject(found, newLeaf as PaneType)
+        }
+      )
+
+      const newLayout = updateObject(
+        state.user.layout,
+        {
+          rootPane: newRootPane
+        }
+      )
+
+      console.log(newRootPane)
+
+      return updateObject(
+        state,
+        {
+          user: updateObject(
+            state.user,
+            { layout: newLayout }
+          )
+        }
+      )
+    } else {
+      searchQueue.push(pane.firstChild)
+      searchQueue.push(pane.secondChild)
+    }
+  }
+
+  return state
 }

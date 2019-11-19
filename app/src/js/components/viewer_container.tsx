@@ -5,7 +5,7 @@ import Select from '@material-ui/core/Select'
 import ViewStreamIcon from '@material-ui/icons/ViewStream'
 import { withStyles } from '@material-ui/styles'
 import React from 'react'
-import { splitPane } from '../action/common'
+import { splitPane, deletePane } from '../action/common'
 import Session from '../common/session'
 import * as types from '../common/types'
 import { ImageViewerConfigType, SplitType, ViewerConfigType } from '../functional/types'
@@ -14,8 +14,8 @@ import { Component } from './component'
 import ImageViewer from './image_viewer'
 import Label2dViewer from './label2d_viewer'
 import Label3dViewer from './label3d_viewer'
-// import MouseEventListeners from './mouse_event_listeners'
 import PointCloudViewer from './point_cloud_viewer'
+import CloseIcon from '@material-ui/icons/Close'
 
 /** Generate string to use for react component key */
 export function viewerContainerReactKey (id: number) {
@@ -249,7 +249,20 @@ class ViewerContainer extends Component<Props> {
               }
             }}
           >
-            <ViewStreamIcon rotate={90} />
+            <ViewStreamIcon />
+          </IconButton>
+          <IconButton
+            className={this.props.classes.icon}
+            onClick={() => {
+              if (this._viewerConfig) {
+                Session.dispatch(deletePane(
+                  this._viewerConfig.pane,
+                  this.props.id
+                ))
+              }
+            }}
+          >
+            <CloseIcon />
           </IconButton>
         </Grid>
         <div

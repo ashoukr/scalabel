@@ -30,6 +30,7 @@ export const MERGE_TRACKS = 'MERGE_TRACKS'
 export const ADD_VIEWER_CONFIG = 'ADD_VIEWER_CONFIG'
 export const CHANGE_VIEWER_CONFIG = 'CHANGE_VIEWER_CONFIG'
 export const SPLIT_PANE = 'SPLIT_PANE'
+export const DELETE_PANE = 'DELETE_PANE'
 
 export const TASK_ACTION_TYPES = [
   ADD_LABELS,
@@ -159,6 +160,13 @@ export interface SplitPaneAction extends BaseAction {
   split: SplitType
 }
 
+export interface DeletePaneAction extends BaseAction {
+  /** ID of pane to split */
+  pane: number
+  /** ID of corresponding viewer config */
+  viewerConfig: number
+}
+
 export type SessionActionType =
   InitSessionAction
   | LoadItemAction
@@ -170,6 +178,7 @@ export type UserActionType =
   | ChangeViewerConfigAction
   | AddViewerConfigAction
   | SplitPaneAction
+  | DeletePaneAction
 
 export type TaskActionType =
   AddLabelsAction
