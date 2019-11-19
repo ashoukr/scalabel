@@ -65,10 +65,16 @@ export class Label2dViewer extends Viewer<Props> {
   private displayToImageRatio: number
   /** The crosshair */
   private crosshair: React.RefObject<Crosshair2D>
+  /** key up listener */
+  private _keyUpListener: (e: KeyboardEvent) => void
+  /** key down listener */
+  private _keyDownListener: (e: KeyboardEvent) => void
 
   // keyboard and mouse status
   /** The hashed list of keys currently down */
   private _keyDownMap: { [key: string]: boolean }
+  /** drawable callback */
+  private _drawableUpdateCallback: () => void
 
   /**
    * Constructor, handles subscription to store
@@ -92,6 +98,10 @@ export class Label2dViewer extends Viewer<Props> {
     this.display = this.props.display
     this._labelHandler = new Label2DHandler()
     this.crosshair = React.createRef()
+
+    this._keyUpListener = (e) => { this.onKeyUp(e) }
+    this._keyDownListener = (e) => { this.onKeyDown(e) }
+    this._drawableUpdateCallback = this.redraw.bind(this)
   }
 
   /**
@@ -99,8 +109,19 @@ export class Label2dViewer extends Viewer<Props> {
    */
   public componentDidMount () {
     super.componentDidMount()
-    document.addEventListener('keydown', (e) => { this.onKeyDown(e) })
-    document.addEventListener('keyup', (e) => { this.onKeyUp(e) })
+    document.addEventListener('keydown', this._keyDownListener)
+    document.addEventListener('keyup', this._keyUpListener)
+    Session.label2dList.subscribe(this._drawableUpdateCallback)
+  }
+
+  /**
+   * Unmount callback
+   */
+  public componentWillUnmount () {
+    super.componentWillUnmount()
+    document.removeEventListener('keydown', this._keyDownListener)
+    document.removeEventListener('keyup', this._keyUpListener)
+    Session.label2dList.unsubscribe(this._drawableUpdateCallback)
   }
 
   /**
@@ -208,7 +229,7 @@ export class Label2dViewer extends Viewer<Props> {
     if (this._labelHandler.onMouseDown(mousePos, labelIndex, handleIndex)) {
       e.stopPropagation()
     }
-    this.redraw()
+    Session.label2dList.onDrawableUpdate()
   }
 
   /**
@@ -223,7 +244,7 @@ export class Label2dViewer extends Viewer<Props> {
     const mousePos = this.getMousePos(e)
     const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
     this._labelHandler.onMouseUp(mousePos, labelIndex, handleIndex)
-    this.redraw()
+    Session.label2dList.onDrawableUpdate()
   }
 
   /**
@@ -255,8 +276,7 @@ export class Label2dViewer extends Viewer<Props> {
     )) {
       e.stopPropagation()
     }
-
-    this.redraw()
+    Session.label2dList.onDrawableUpdate()
   }
 
   /**
@@ -271,7 +291,7 @@ export class Label2dViewer extends Viewer<Props> {
     const key = e.key
     this._keyDownMap[key] = true
     this._labelHandler.onKeyDown(e)
-    this.redraw()
+    Session.label2dList.onDrawableUpdate()
   }
 
   /**
@@ -290,7 +310,7 @@ export class Label2dViewer extends Viewer<Props> {
       this.setDefaultCursor()
     }
     this._labelHandler.onKeyUp(e)
-    this.redraw()
+    Session.label2dList.onDrawableUpdate()
   }
 
   /**

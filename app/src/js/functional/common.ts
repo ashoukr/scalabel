@@ -8,11 +8,23 @@ import * as types from '../action/types'
 import { LabelTypeName } from '../common/types'
 import { makeIndexedShape, makePane, makeTrack } from './states'
 import {
-  IndexedShapeType, ItemType, LabelType, PaneType, Select, ShapeType,
-  State, TaskStatus, TaskType, TrackMapType, TrackType, UserType, ViewerConfigType
+  IndexedShapeType,
+  ItemType,
+  LabelType,
+  PaneType,
+  Select,
+  ShapeType,
+  State,
+  TaskStatus,
+  TaskType,
+  TrackMapType,
+  TrackType,
+  UserType,
+  ViewerConfigType
 } from './types'
 import {
-  assignToArray, getObjectKeys,
+  assignToArray,
+  getObjectKeys,
   pickArray,
   pickObject,
   removeListItems,
