@@ -296,7 +296,10 @@ class Label3dViewer extends Viewer<Props> {
    * notify state is updated
    */
   protected updateState (state: State): void {
-    this.display = this.props.display
+    if (this.display !== this.props.display) {
+      this.display = this.props.display
+      this.forceUpdate()
+    }
     // Filter labels if not in layer
     // this.camera.layers.set(this.props.id)
     if (Session.activeViewerId === this.props.id) {

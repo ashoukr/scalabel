@@ -317,7 +317,10 @@ export class Label2dViewer extends Viewer<Props> {
    * notify state is updated
    */
   protected updateState (state: State): void {
-    this.display = this.props.display
+    if (this.display !== this.props.display) {
+      this.display = this.props.display
+      this.forceUpdate()
+    }
     this._labelHandler.updateState(state)
   }
 
