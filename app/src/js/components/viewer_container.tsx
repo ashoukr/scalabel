@@ -1,10 +1,10 @@
-import * as fa from '@fortawesome/free-solid-svg-icons/index'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { IconButton, TextField } from '@material-ui/core'
-import FormGroup from '@material-ui/core/FormGroup'
+import { createStyles, IconButton } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid'
+import MenuItem from '@material-ui/core/MenuItem'
+import Select from '@material-ui/core/Select'
+import ViewStreamIcon from '@material-ui/icons/ViewStream'
+import { withStyles } from '@material-ui/styles'
 import React from 'react'
-import SplitPane from 'react-split-pane'
 import { splitPane } from '../action/common'
 import Session from '../common/session'
 import * as types from '../common/types'
@@ -22,7 +22,45 @@ export function viewerContainerReactKey (id: number) {
   return `viewerContainer${id}`
 }
 
+const styles = () => createStyles({
+  viewer_container_bar: {
+    position: 'absolute',
+    zIndex: 10
+  },
+  select: {
+    'backgroundColor': 'rgba(34, 34, 34, 1)',
+    'border': '1px solid #ced4da',
+    'color': '#ced4da',
+    'borderRadius': 4,
+    'padding': '10px 26px 10px 12px',
+    '&:focus': {
+      borderRadius: 4
+    },
+    'margin-right': '5px'
+  },
+  icon: {
+    color: '#ced4da'
+  },
+  icon90: {
+    color: '#ced4da',
+    transform: 'rotate(90deg)'
+  }
+})
+
+interface ClassType {
+  /** grid */
+  viewer_container_bar: string
+  /** select */
+  select: string
+  /** icon */
+  icon: string
+  /** icon rotated */
+  icon90: string
+}
+
 interface Props {
+  /** classes */
+  classes: ClassType
   /** id of the viewer, for referencing viewer config in state */
   id: number
 }
@@ -130,92 +168,89 @@ class ViewerContainer extends Component<Props> {
     }
 
     return (
-      <SplitPane
-        split={'horizontal'}
-        size={'60px'}
-        allowResize={false}
-      >
-        <Grid justify={'flex-end'} container>
-          <FormGroup row={true}>
-            <TextField
-              value={
-                (this._viewerConfig) ? this._viewerConfig.type :
-                  types.ViewerConfigTypeName.UNKNOWN
+      <div>
+        <Grid
+          justify={'flex-end'}
+          container
+          direction='row'
+          classes={{
+            container: this.props.classes.viewer_container_bar
+          }}
+        >
+          <Select
+            value={
+              (this._viewerConfig) ? this._viewerConfig.type :
+                types.ViewerConfigTypeName.UNKNOWN
+            }
+            // onChange={
+            //   this.handleItemTypeChange
+            // }
+            classes={{ select: this.props.classes.select }}
+            inputProps={{
+              classes: {
+                icon: this.props.classes.icon
               }
-              select
-              label='Viewer Type'
-              // onChange={
-              //   this.handleItemTypeChange
-              // }
-              inputProps={{
-                'data-testid': 'viewer-type'
-              }}
-              SelectProps={{
-                native: true
-              }}
-            >
-              <option value={types.ViewerConfigTypeName.IMAGE}>Image</option>
-              <option value={types.ViewerConfigTypeName.POINT_CLOUD}>
-                Point Cloud
-              </option>
-              <option value={types.ViewerConfigTypeName.IMAGE_3D}>
-                Image 3D
-              </option>
-            </TextField>
-            <TextField
-              value={
-                (this._viewerConfig) ? this._viewerConfig.sensor : null
+            }}
+          >
+            <MenuItem value={types.ViewerConfigTypeName.IMAGE}>Image</MenuItem>
+            <MenuItem value={types.ViewerConfigTypeName.POINT_CLOUD}>
+              Point Cloud
+            </MenuItem>
+            <MenuItem value={types.ViewerConfigTypeName.IMAGE_3D}>
+              Image 3D
+            </MenuItem>
+          </Select>
+          <Select
+            value={
+              (this._viewerConfig) ? this._viewerConfig.sensor : null
+            }
+            // onChange={
+            //   this.handleItemTypeChange
+            // }
+            classes={{ select: this.props.classes.select }}
+            inputProps={{
+              classes: {
+                icon: this.props.classes.icon
               }
-              select
-              label='Sensor'
-              // onChange={
-              //   this.handleItemTypeChange
-              // }
-              inputProps={{
-                'data-testid': 'sensor'
-              }}
-              SelectProps={{
-                native: true
-              }}
-            >
-              {Object.keys(this.state.task.sensors).filter((key) =>
-                (this._viewerConfig) ?
-                  this.state.task.sensors[Number(key)].type ===
-                    this._viewerConfig.type :
-                  false
-              ).map((key) =>
-                <option value={Number(key)}>{key}</option>
-              )}
-            </TextField>
-            <IconButton
-              data-testid={'split-vertical'}
-              onClick={() => {
-                if (this._viewerConfig) {
-                  Session.dispatch(splitPane(
-                    this._viewerConfig.pane,
-                    SplitType.VERTICAL,
-                    this.props.id
-                  ))
-                }
-              }}
-            >
-              <FontAwesomeIcon icon={fa.faColumns} size='xs'/>
-            </IconButton>
-            <IconButton
-              data-testid={'split-horizontal'}
-              onClick={() => {
-                if (this._viewerConfig) {
-                  Session.dispatch(splitPane(
-                    this._viewerConfig.pane,
-                    SplitType.HORIZONTAL,
-                    this.props.id
-                  ))
-                }
-              }}
-            >
-              <FontAwesomeIcon icon={fa.faColumns} size='xs' rotation={90}/>
-            </IconButton>
-          </FormGroup>
+            }}
+          >
+            {Object.keys(this.state.task.sensors).filter((key) =>
+              (this._viewerConfig) ?
+                this.state.task.sensors[Number(key)].type ===
+                  this._viewerConfig.type :
+                false
+            ).map((key) =>
+              <MenuItem value={Number(key)}>{key}</MenuItem>
+            )}
+          </Select>
+          <IconButton
+            className={this.props.classes.icon90}
+            onClick={() => {
+              if (this._viewerConfig) {
+                Session.dispatch(splitPane(
+                  this._viewerConfig.pane,
+                  SplitType.VERTICAL,
+                  this.props.id
+                ))
+              }
+            }}
+          >
+            <ViewStreamIcon />
+          </IconButton>
+          <IconButton
+            className={this.props.classes.icon}
+            onClick={() => {
+              if (this._viewerConfig) {
+                Session.dispatch(splitPane(
+                  this._viewerConfig.pane,
+                  SplitType.HORIZONTAL,
+                  this.props.id
+                ))
+              }
+            }}
+          >
+            <ViewStreamIcon rotate={90} />
+          </IconButton>
         </Grid>
         <div
           ref={(element) => {
@@ -243,7 +278,7 @@ class ViewerContainer extends Component<Props> {
         >
           {views}
         </div>
-      </SplitPane>
+      </div>
     )
   }
 
@@ -344,4 +379,4 @@ class ViewerContainer extends Component<Props> {
   }
 }
 
-export default ViewerContainer
+export default withStyles(styles, { withTheme: true })(ViewerContainer)
