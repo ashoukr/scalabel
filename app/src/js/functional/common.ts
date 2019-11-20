@@ -888,12 +888,10 @@ export function splitPane (
 export function deletePane (
   state: State, action: types.DeletePaneAction
 ): State {
-  console.log(action)
   const searchQueue: PaneType[] = []
   if (action.pane !== state.user.layout.rootPane.id) {
     searchQueue.push(state.user.layout.rootPane)
   }
-  console.log(state.user.layout.rootPane)
   while (searchQueue.length > 0) {
     const pane = searchQueue.pop() as PaneType
     if (pane.viewerId >= 0 || !pane.firstChild || !pane.secondChild) {
@@ -908,12 +906,10 @@ export function deletePane (
     }
 
     if (newLeaf) {
-      console.log(newLeaf)
       const newRootPane = recursivePaneUpdate(
         state.user.layout.rootPane,
         pane.id,
         (found: PaneType) => {
-          console.log('found', found)
           return updateObject(found, newLeaf as PaneType)
         }
       )
@@ -924,8 +920,6 @@ export function deletePane (
           rootPane: newRootPane
         }
       )
-
-      console.log(newRootPane)
 
       return updateObject(
         state,
