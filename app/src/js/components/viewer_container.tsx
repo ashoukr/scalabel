@@ -6,9 +6,10 @@ import CloseIcon from '@material-ui/icons/Close'
 import ViewStreamIcon from '@material-ui/icons/ViewStream'
 import { withStyles } from '@material-ui/styles'
 import React from 'react'
-import { deletePane, splitPane } from '../action/common'
+import { changeViewerConfig, deletePane, splitPane } from '../action/common'
 import Session from '../common/session'
 import * as types from '../common/types'
+import { makeImage3DViewerConfig, makeImageViewerConfig, makePointCloudViewerConfig } from '../functional/states'
 import { ImageViewerConfigType, SplitType, ViewerConfigType } from '../functional/types'
 import ViewerConfigUpdater from '../view_config/viewer_config'
 import { Component } from './component'
@@ -20,6 +21,28 @@ import PointCloudViewer from './point_cloud_viewer'
 /** Generate string to use for react component key */
 export function viewerContainerReactKey (id: number) {
   return `viewerContainer${id}`
+}
+
+/**
+ * Create viewer config based on type
+ * @param type
+ * @param pane
+ * @param sensor
+ */
+function makeViewerConfig (
+  type: types.ViewerConfigTypeName,
+  pane: number,
+  sensor: number
+): ViewerConfigType | null {
+  switch (type) {
+    case types.ViewerConfigTypeName.IMAGE:
+      return makeImageViewerConfig(pane, sensor)
+    case types.ViewerConfigTypeName.IMAGE_3D:
+      return makeImage3DViewerConfig(pane, sensor)
+    case types.ViewerConfigTypeName.POINT_CLOUD:
+      return makePointCloudViewerConfig(pane, sensor)
+  }
+  return null
 }
 
 const styles = () => createStyles({
@@ -123,6 +146,19 @@ class ViewerContainer extends Component<Props> {
    */
   public render () {
     const id = this.props.id
+    const viewerConfig = this.state.user.viewerConfigs[this.props.id]
+    this._viewerConfig = viewerConfig
+    if (viewerConfig && this._container) {
+      const viewerType = viewerConfig.type
+      if (viewerType === types.ViewerConfigTypeName.IMAGE ||
+          types.ViewerConfigTypeName.IMAGE_3D) {
+        this._container.scrollTop =
+        (viewerConfig as ImageViewerConfigType).displayTop
+        this._container.scrollLeft =
+          (viewerConfig as ImageViewerConfigType).displayLeft
+      }
+    }
+    this._viewerConfigUpdater.updateState(this.state, this.props.id)
 
     const views: React.ReactElement[] = []
     if (this._viewerConfig) {
@@ -182,9 +218,21 @@ class ViewerContainer extends Component<Props> {
               (this._viewerConfig) ? this._viewerConfig.type :
                 types.ViewerConfigTypeName.UNKNOWN
             }
-            // onChange={
-            //   this.handleItemTypeChange
-            // }
+            onChange={(e) => {
+              if (this._viewerConfig) {
+                const newConfig = makeViewerConfig(
+                  e.target.value as types.ViewerConfigTypeName,
+                  this._viewerConfig.pane,
+                  this._viewerConfig.sensor
+                )
+                if (newConfig) {
+                  Session.dispatch(changeViewerConfig(
+                    this.props.id,
+                    newConfig
+                  ))
+                }
+              }
+            }}
             classes={{ select: this.props.classes.select }}
             inputProps={{
               classes: {
@@ -293,26 +341,6 @@ class ViewerContainer extends Component<Props> {
         </div>
       </div>
     )
-  }
-
-  /**
-   * Run when state is updated
-   * @param state
-   */
-  public componentDidUpdate (): void {
-    const viewerConfig = this.state.user.viewerConfigs[this.props.id]
-    this._viewerConfig = viewerConfig
-    if (viewerConfig && this._container) {
-      const viewerType = viewerConfig.type
-      if (viewerType === types.ViewerConfigTypeName.IMAGE ||
-          types.ViewerConfigTypeName.IMAGE_3D) {
-        this._container.scrollTop =
-        (viewerConfig as ImageViewerConfigType).displayTop
-        this._container.scrollLeft =
-          (viewerConfig as ImageViewerConfigType).displayLeft
-      }
-    }
-    this._viewerConfigUpdater.updateState(this.state, this.props.id)
   }
 
   /**

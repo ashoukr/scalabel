@@ -19,8 +19,7 @@ import {
   TaskType,
   TrackMapType,
   TrackType,
-  UserType,
-  ViewerConfigType
+  UserType
 } from './types'
 import {
   assignToArray,
@@ -761,14 +760,15 @@ export function changeViewerConfig (
   state: State, action: types.ChangeViewerConfigAction
 ): State {
   if (action.viewerId in state.user.viewerConfigs) {
-    const newViewerConfig: {[id: number]: ViewerConfigType} = {}
-    newViewerConfig[action.viewerId] = updateObject(
-      state.user.viewerConfigs[action.viewerId],
-      action.config
-    )
+    const oldConfig = state.user.viewerConfigs[action.viewerId]
+    const newViewerConfig = (action.config.type === oldConfig.type) ?
+      updateObject(
+        oldConfig,
+        action.config
+      ) : _.cloneDeep(action.config)
     const viewerConfigs = updateObject(
       state.user.viewerConfigs,
-      newViewerConfig
+      { [action.viewerId]: newViewerConfig }
     )
     return updateObject(
       state,

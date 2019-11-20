@@ -2,8 +2,9 @@ import _ from 'lodash'
 import * as types from '../common/types'
 import {
   ConfigType, CubeType,
-  ExtrinsicsType, ImageViewerConfigType,
-  IndexedShapeType, IntrinsicsType, ItemStatus, ItemType,
+  ExtrinsicsType, Image3DViewerConfigType,
+  ImageViewerConfigType, IndexedShapeType, IntrinsicsType, ItemStatus,
+  ItemType,
   LabelType,
   LayoutType,
   PaneType,
@@ -196,6 +197,19 @@ export function makePointCloudViewerConfig (
     sensor,
     pane
   }
+}
+
+/**
+ * Make image 3d viewer config
+ * @param pane
+ * @param sensor
+ */
+export function makeImage3DViewerConfig (
+  pane: number, sensor: number = -1
+): Image3DViewerConfigType {
+  const pcConfig = makePointCloudViewerConfig(pane, sensor)
+  const imageConfig = makeImageViewerConfig(pane, sensor)
+  return { ...pcConfig, ...imageConfig }
 }
 
 /**

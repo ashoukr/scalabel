@@ -100,11 +100,14 @@ export class ImageViewer extends Viewer<Props> {
    */
   public redraw (): boolean {
     if (this.currentItemIsLoaded() && this.imageCanvas && this.imageContext) {
-      const image = Session.images[this.state.user.select.item][
-        this.state.user.viewerConfigs[this.props.id].sensor
-      ]
-      // redraw imageCanvas
-      drawImageOnCanvas(this.imageCanvas, this.imageContext, image)
+      const item = this.state.user.select.item
+      const sensor = this.state.user.viewerConfigs[this.props.id].sensor
+      if (item < Session.images.length &&
+          sensor in Session.images[item]) {
+        const image = Session.images[item][sensor]
+        // redraw imageCanvas
+        drawImageOnCanvas(this.imageCanvas, this.imageContext, image)
+      }
     }
     return true
   }

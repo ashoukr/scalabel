@@ -343,6 +343,7 @@ class Label3dViewer extends Viewer<Props> {
         this.canvas = component
         const rendererParams = { canvas: this.canvas, alpha: true }
         this.renderer = new THREE.WebGLRenderer(rendererParams)
+        this.forceUpdate()
       }
 
       if (this.canvas && this.display) {
