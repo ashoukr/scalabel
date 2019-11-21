@@ -1,11 +1,11 @@
 import { createStyles } from '@material-ui/core'
+import { withStyles } from '@material-ui/styles'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
 import { updateAll } from '../action/common'
 import Session from '../common/session'
 import { PaneType } from '../functional/types'
 import ViewerContainer, { viewerContainerReactKey } from './viewer_container'
-import { withStyles } from '@material-ui/styles'
 
 /**
  * Wrapper for SplitPane
