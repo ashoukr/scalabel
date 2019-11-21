@@ -1,17 +1,27 @@
-import { createStyles } from '@material-ui/core'
 import { withStyles } from '@material-ui/styles'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
 import { updateAll } from '../action/common'
 import Session from '../common/session'
 import { PaneType } from '../functional/types'
+import { resizerStyles } from '../styles/split_pane'
 import ViewerContainer, { viewerContainerReactKey } from './viewer_container'
+
+interface ClassType {
+  /** class name for resizer */
+  resizer: string
+}
+
+interface Props extends PaneType {
+  /** class names */
+  classes: ClassType
+}
 
 /**
  * Wrapper for SplitPane
  */
-class LabelPane extends React.Component<PaneType> {
-  constructor (props: PaneType) {
+class LabelPane extends React.Component<Props> {
+  constructor (props: Props) {
     super(props)
   }
 
@@ -35,11 +45,11 @@ class LabelPane extends React.Component<PaneType> {
       throw new Error('Missing primary size')
     }
 
-    const firstChild = (<LabelPane
+    const firstChild = (<StyledLabelPane
       {...this.props.firstChild}
     />)
 
-    const secondChild = (<LabelPane
+    const secondChild = (<StyledLabelPane
       {...this.props.secondChild}
     />)
 
@@ -52,6 +62,7 @@ class LabelPane extends React.Component<PaneType> {
         primary={this.props.primary}
         onChange={() => Session.dispatch(updateAll())}
         allowResize
+        resizerClassName={this.props.classes.resizer}
       >
         {firstChild}
         {secondChild}
@@ -60,47 +71,6 @@ class LabelPane extends React.Component<PaneType> {
   }
 }
 
-const styles = () => createStyles({
-  Resizer: {
-    'background': 'rgba(150, 150, 150, 1)',
-    'opacity': 0.2,
-    'zIndex': 1,
-    '-moz-box-sizing': 'border-box',
-    '-webkit-box-sizing': 'border-box',
-    'box-sizing': 'border-box',
-    '-moz-background-clip': 'padding',
-    '-webkit-background-clip': 'padding',
-    'background-clip': 'padding-box',
-    '&:hover': {
-      '-webkit-transition': 'all 2s ease',
-      'transition': 'all 2s ease'
-    },
-    '&.horizontal': {
-      'height': '11px',
-      'margin': '-5px 0',
-      'border-top': '5px solid rgba(255, 255, 255, 0)',
-      'border-bottom': '5px solid rgba(255, 255, 255, 0)',
-      'cursor': 'row-resize',
-      'width': '100%'
-    },
-    '&.vertical': {
-      'width': '11px',
-      'margin': '0 -5px',
-      'border-left': '5px solid rgba(255, 255, 255, 0)',
-      'border-right': '5px solid rgba(255, 255, 255, 0)',
-      'cursor': 'col-resize',
-      '&:hover': {
-        'border-top': '5px solid rgba(100, 100, 100, 1)',
-        'border-bottom': '5px solid rgba(100, 100, 100, 1)'
-      }
-    },
-    '&.disabled': {
-      'cursor': 'not-allowed',
-      '&:hover': {
-        'border-color': 'transparent'
-      }
-    }
-  }
-})
+const StyledLabelPane = withStyles(resizerStyles)(LabelPane)
 
-export default withStyles(styles, { withTheme: true })(LabelPane)
+export default StyledLabelPane
