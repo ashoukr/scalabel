@@ -1,5 +1,4 @@
 import { IconButton } from '@material-ui/core'
-import { viewerContainerStyles } from '../styles/viewer_container'
 import Grid from '@material-ui/core/Grid'
 import MenuItem from '@material-ui/core/MenuItem'
 import Select from '@material-ui/core/Select'
@@ -12,6 +11,7 @@ import Session from '../common/session'
 import * as types from '../common/types'
 import { makeImage3DViewerConfig, makeImageViewerConfig, makePointCloudViewerConfig } from '../functional/states'
 import { ImageViewerConfigType, SplitType, ViewerConfigType } from '../functional/types'
+import { viewerContainerStyles } from '../styles/viewer_container'
 import ViewerConfigUpdater from '../view_config/viewer_config'
 import { Component } from './component'
 import ImageViewer from './image_viewer'
@@ -179,8 +179,7 @@ class ViewerContainer extends Component<Props> {
       }
     }
 
-    return (
-      <div>
+    const viewerContainerBar = (
         <Grid
           justify={'flex-end'}
           container
@@ -289,6 +288,11 @@ class ViewerContainer extends Component<Props> {
             <CloseIcon />
           </IconButton>
         </Grid>
+    )
+
+    return (
+      <div>
+        {viewerContainerBar}
         <div
           ref={(element) => {
             if (element && this._container !== element) {
