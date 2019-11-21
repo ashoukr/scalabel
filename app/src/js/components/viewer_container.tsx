@@ -1,4 +1,5 @@
-import { createStyles, IconButton } from '@material-ui/core'
+import { IconButton } from '@material-ui/core'
+import { viewerContainerStyles } from '../styles/viewer_container'
 import Grid from '@material-ui/core/Grid'
 import MenuItem from '@material-ui/core/MenuItem'
 import Select from '@material-ui/core/Select'
@@ -44,31 +45,6 @@ function makeViewerConfig (
   }
   return null
 }
-
-const styles = () => createStyles({
-  viewer_container_bar: {
-    position: 'absolute',
-    zIndex: 10
-  },
-  select: {
-    'backgroundColor': 'rgba(34, 34, 34, 1)',
-    'border': '1px solid #ced4da',
-    'color': '#ced4da',
-    'borderRadius': 4,
-    'padding': '10px 26px 10px 12px',
-    '&:focus': {
-      borderRadius: 4
-    },
-    'margin-right': '5px'
-  },
-  icon: {
-    color: '#ced4da'
-  },
-  icon90: {
-    color: '#ced4da',
-    transform: 'rotate(90deg)'
-  }
-})
 
 interface ClassType {
   /** grid */
@@ -420,4 +396,6 @@ class ViewerContainer extends Component<Props> {
   }
 }
 
-export default withStyles(styles, { withTheme: true })(ViewerContainer)
+export default withStyles(
+  viewerContainerStyles, { withTheme: true }
+)(ViewerContainer)
