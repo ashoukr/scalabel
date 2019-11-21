@@ -25,7 +25,7 @@ function makeDrawableLabel3D (
   return null
 }
 
-/**
+/**s
  * List of drawable labels
  */
 export class Label3DList {

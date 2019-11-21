@@ -13,7 +13,7 @@ export class TranslationPlane extends THREE.Mesh
     super(
       new THREE.PlaneGeometry(0.5, 0.5),
       new THREE.MeshBasicMaterial({
-        color, side: THREE.DoubleSide, transparent: true
+        color, side: THREE.DoubleSide, transparent: false
       })
     )
     this._normal = new THREE.Vector3()
@@ -46,7 +46,7 @@ export class TranslationPlane extends THREE.Mesh
    */
   public setFaded (): void {
     { (this.material as THREE.Material).needsUpdate = true }
-    { (this.material as THREE.Material).opacity = 0.25 }
+    { (this.material as THREE.Material).opacity = 0.05 }
   }
 
   /**

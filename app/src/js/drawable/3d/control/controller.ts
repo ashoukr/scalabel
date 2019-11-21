@@ -169,6 +169,29 @@ export abstract class Controller extends THREE.Object3D {
 
       const worldScale = new THREE.Vector3()
       this._object.getWorldScale(worldScale)
+      if (this._object.children) {
+        if (this._object.children.length === 2) {
+          for (const cube of this._object.children) {
+            if (cube === this.parent) {
+              continue
+            }
+            cube.getWorldScale(worldScale)
+          }
+        } else if (this._object.children.length >= 3) {
+          for (const cube of this._object.children) {
+            if (cube instanceof THREE.LineSegments) {
+              cube.geometry.computeBoundingBox()
+              const bbox = cube.geometry.boundingBox
+              const scale = new THREE.Vector3(
+                bbox.max.x - bbox.min.x,
+                bbox.max.y - bbox.min.y,
+                bbox.max.z - bbox.min.z
+              )
+              worldScale.copy(scale)
+            }
+          }
+        }
+      }
 
       for (const unit of this._controlUnits) {
         unit.updateScale(worldScale)

@@ -13,7 +13,7 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
   constructor (normal: THREE.Vector3, color: number) {
     super(
       new THREE.TorusGeometry(1, .02, 32, 24),
-      new THREE.MeshBasicMaterial({ color, transparent: true })
+      new THREE.MeshBasicMaterial({ color, transparent: false })
    )
     this._normal = normal
 
@@ -24,7 +24,7 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
     )
     this._guideline = new THREE.Line(
       lineGeometry,
-      new THREE.LineBasicMaterial({ color, transparent: true })
+      new THREE.LineBasicMaterial({ color, transparent: false })
     )
     this._guideline.scale.set(1, 1, 1)
 
@@ -57,7 +57,7 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
    */
   public setFaded (): void {
     { (this.material as THREE.Material).needsUpdate = true }
-    { (this.material as THREE.Material).opacity = 0.25 }
+    { (this.material as THREE.Material).opacity = 0.05 }
   }
 
   /**
