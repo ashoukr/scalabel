@@ -238,12 +238,25 @@ class Label3dViewer extends Viewer<Props> {
 
     this._raycaster.setFromCamera(new THREE.Vector2(x, y), this.camera)
 
-    const shapes = Session.label3dList.raycastableShapes
-    const intersects = this._raycaster.intersectObjects(
+    const label3dList = Session.label3dList
+    const shapes = (
       // Need to do this middle conversion because ThreeJS does not specify
       // as readonly, but this should be readonly for all other purposes
-      shapes as unknown as THREE.Object3D[], false
+      label3dList.raycastableShapes.slice() as unknown as THREE.Object3D[]
     )
+    const control = Session.label3dList.control
+    const intersectsControl = control ?
+      this._raycaster.intersectObjects(
+        [control], false
+      ) :
+      this._raycaster.intersectObjects(
+        [], false
+      )
+    const intersects = intersectsControl && intersectsControl.length > 0 ?
+      intersectsControl :
+      this._raycaster.intersectObjects(
+        shapes, false
+      )
 
     const consumed = (intersects && intersects.length > 0) ?
       this._labelHandler.onMouseMove(x, y, this.camera, intersects[0]) :
