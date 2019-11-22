@@ -152,6 +152,20 @@ export function selectLabels (
  * @param itemIndex
  * @param labelId
  */
+export function unselectLabel (
+  currentSelection: {[index: number]: number[]},
+  itemIndex: number,
+  labelId: number
+) {
+  return unselectLabels(currentSelection, itemIndex, [labelId])
+}
+
+/**
+ * Unselect labels
+ * @param currentSelection
+ * @param itemIndex
+ * @param labelIds
+ */
 export function unselectLabels (
   currentSelection: {[index: number]: number[]},
   itemIndex: number,
