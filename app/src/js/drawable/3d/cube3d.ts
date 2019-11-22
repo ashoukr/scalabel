@@ -229,6 +229,10 @@ export class Cube3D extends Shape3D {
     shape: ShapeType, id: number, activeCamera?: THREE.Camera
   ) {
     super.updateState(shape, id)
+    const geometry = this._box.geometry as THREE.Geometry
+    for (const face of geometry.faces) {
+      face.color.fromArray(this._color)
+    }
     const cube = shape as CubeType
     this.center = (new Vector3D()).fromObject(cube.center)
     this.orientation = (new Vector3D()).fromObject(cube.orientation)
