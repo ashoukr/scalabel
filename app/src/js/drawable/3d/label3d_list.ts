@@ -5,6 +5,7 @@ import { LabelTypeName, TrackPolicyType } from '../../common/types'
 import { makeState } from '../../functional/states'
 import { CubeType, State } from '../../functional/types'
 import { Box3D } from './box3d'
+import { PURPLE } from './common'
 import { TransformationControl } from './control/transformation_control'
 import { Label3D } from './label3d'
 import { Plane3D } from './plane3d'
@@ -31,7 +32,6 @@ function makeDrawableLabel3D (
 export class Label3DList {
   /** transformation control */
   public control: TransformationControl
-
   /** Scalabel id to labels */
   private _labels: {[labelId: number]: Label3D}
   /** ThreeJS Object id to labels */
@@ -40,8 +40,10 @@ export class Label3DList {
   private _state: State
   /** Scene for rendering */
   private _scene: THREE.Scene
-  /** selected label */
-  private _selectedLabel: Label3D | null
+  /** selected label Group */
+  private _selectedLabelGroup: THREE.Group
+  /** selected label Group bounding box */
+  private _boundingBox: THREE.LineSegments
   /** List of ThreeJS objects for raycasting */
   private _raycastableShapes: Readonly<Array<Readonly<Shape3D>>>
   /** active camera */
@@ -51,7 +53,8 @@ export class Label3DList {
     this.control = new TransformationControl()
     this._labels = {}
     this._raycastMap = {}
-    this._selectedLabel = null
+    this._selectedLabelGroup = new THREE.Group()
+    this._boundingBox = new THREE.LineSegments()
     this._scene = new THREE.Scene()
     this._raycastableShapes = []
     this._state = makeState()
@@ -65,10 +68,24 @@ export class Label3DList {
   }
 
   /**
-   * Get selected label
+   * Get selected label group
    */
-  public get selectedLabel (): Label3D | null {
-    return this._selectedLabel
+  public get selectedLabelGroup (): THREE.Group {
+    return this._selectedLabelGroup
+  }
+
+  /**
+   * Get selected label group bounding box
+   */
+  public get boundingBox (): THREE.LineSegments {
+    return this._boundingBox
+  }
+
+  /**
+   * Get labels
+   */
+  public get labels (): {[labelId: number]: Label3D} {
+    return this._labels
   }
 
   /**
@@ -104,12 +121,7 @@ export class Label3DList {
     const newRaycastableShapes: Array<Readonly<Shape3D>> = []
     const newRaycastMap: {[id: number]: Label3D} = {}
     const item = state.task.items[state.user.select.item]
-
-    if (this._selectedLabel) {
-      this._selectedLabel.selected = false
-      this._selectedLabel.detachControl()
-    }
-    this._selectedLabel = null
+    const prevItemLength = this._selectedLabelGroup.children.length
 
     for (const key of Object.keys(this._labels)) {
       const id = Number(key)
@@ -156,7 +168,7 @@ export class Label3DList {
         }
       }
     }
-
+    this._scene.remove(this._selectedLabelGroup)
     this._raycastableShapes = newRaycastableShapes
     this._labels = newLabels
     this._raycastMap = newRaycastMap
@@ -164,12 +176,80 @@ export class Label3DList {
     const select = state.user.select
     if (select.item in select.labels) {
       const selectedLabelIds = select.labels[select.item]
+
+      // Special behavior if there is only one label
+      // axis align control, no bounding box
       if (selectedLabelIds.length === 1 &&
           selectedLabelIds[0] in this._labels) {
-        this._selectedLabel = this._labels[select.labels[select.item][0]]
-        this._selectedLabel.attachControl(this.control)
+        this._selectedLabelGroup = new THREE.Group()
+
+        this.addLabelsToGroup(selectedLabelIds)
+
+        const cube = this._selectedLabelGroup.children[0]
+        this._selectedLabelGroup.position.copy(cube.position)
+        cube.position.sub(this._selectedLabelGroup.position)
+
+        const cubeQuaternion = new THREE.Quaternion().copy(cube.quaternion)
+        this._selectedLabelGroup.applyQuaternion(cubeQuaternion)
+        cube.applyQuaternion(cubeQuaternion.inverse())
+      } else {
+        // Group has changed if labels have changed
+        let groupChanged = false
+        if (prevItemLength - 2 !== selectedLabelIds.length) {
+          groupChanged = true
+        } else {
+          for (const cube of this._selectedLabelGroup.children) {
+            if (cube === this.control || cube === this._boundingBox) {
+              continue
+            }
+            const labelId = (cube as Shape3D).label.labelId
+            if (!(selectedLabelIds.includes(labelId))) {
+              groupChanged = true
+              break
+            }
+          }
+        }
+        // Check if the group labels have changed
+        if (groupChanged) {
+          // Switch to rotation to ensure no group scaling
+          this.control.onKeyDown(new KeyboardEvent('keydown', { key: 'r' }))
+
+          this._selectedLabelGroup = new THREE.Group()
+          this.addLabelsToGroup(selectedLabelIds)
+
+          const bbox = new THREE.Box3().setFromObject(this._selectedLabelGroup)
+          bbox.getCenter(this._selectedLabelGroup.position)
+          for (const cube of this._selectedLabelGroup.children) {
+            cube.position.sub(this._selectedLabelGroup.position)
+          }
+
+          const geometry = new THREE.BoxBufferGeometry(
+            bbox.max.x - bbox.min.x,
+            bbox.max.y - bbox.min.y,
+            bbox.max.z - bbox.min.z)
+          const edges = new THREE.EdgesGeometry(geometry)
+          this._boundingBox = new THREE.LineSegments(edges,
+            new THREE.LineBasicMaterial({ color: PURPLE }))
+        } else {
+          const groupMatrix = new THREE.Matrix4()
+          groupMatrix.copy(this._selectedLabelGroup.matrix)
+          this._selectedLabelGroup = new THREE.Group()
+          this._selectedLabelGroup.applyMatrix(groupMatrix)
+          this.addLabelsToGroup(selectedLabelIds)
+          const groupMatrixInv = new THREE.Matrix4().getInverse(groupMatrix)
+          for (const cube of this._selectedLabelGroup.children) {
+            cube.applyMatrix(groupMatrixInv)
+          }
+        }
+        this._selectedLabelGroup.add(this._boundingBox)
       }
+      this._selectedLabelGroup.add(this.control)
+      this.control.attach(this._selectedLabelGroup)
+    } else {
+      this._selectedLabelGroup = new THREE.Group()
+      this._boundingBox = new THREE.LineSegments()
     }
+    this._scene.add(this._selectedLabelGroup)
   }
 
   /**
@@ -199,5 +279,15 @@ export class Label3DList {
   /** Set active camera */
   public setActiveCamera (camera: THREE.Camera) {
     this._activeCamera = camera
+  }
+
+  /**
+   * Get control if there is a group
+   */
+  private addLabelsToGroup (labelIds: number[]) {
+    for (const labelId of labelIds) {
+      this._labels[labelId].selected = true
+      this._labels[labelId].addToSelectedGroup(this._selectedLabelGroup)
+    }
   }
 }

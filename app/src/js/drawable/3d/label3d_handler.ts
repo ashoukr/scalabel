@@ -1,14 +1,15 @@
 import _ from 'lodash'
 import * as THREE from 'three'
 import { addLabel, changeShapes } from '../../action/common'
-import { selectLabel } from '../../action/select'
+import { selectLabel, unselectLabel } from '../../action/select'
 import Session from '../../common/session'
 import { makeTrackPolicy, Track } from '../../common/track'
 import { Key } from '../../common/types'
 import { getCurrentViewerConfig } from '../../functional/state_util'
 import { makePointCloudViewerConfig, makeTrack } from '../../functional/states'
-import { PointCloudViewerConfigType, State } from '../../functional/types'
+import { PointCloudViewerConfigType, ShapeType, State } from '../../functional/types'
 import { Box3D } from './box3d'
+import { Cube3D } from './cube3d'
 import { Label3D } from './label3d'
 import { Plane3D } from './plane3d'
 
@@ -20,6 +21,8 @@ export class Label3DHandler {
   private _highlightedLabel: Label3D | null
   /** whether mouse is down on the selected box */
   private _mouseDownOnSelection: boolean
+  /** whether mouse is over the group control */
+  private _mouseOverGroupControl: boolean
   /** whether the selected label is changed */
   private _labelChanged: boolean
   /** Plane visualization */
@@ -34,6 +37,7 @@ export class Label3DHandler {
   constructor () {
     this._highlightedLabel = null
     this._mouseDownOnSelection = false
+    this._mouseOverGroupControl = false
     this._labelChanged = false
     // if (Session.itemType === 'image') {
     //   let planeExists = false
@@ -80,17 +84,6 @@ export class Label3DHandler {
    * Process mouse down action
    */
   public onMouseDown (x: number, y: number, camera: THREE.Camera): boolean {
-    if (this._highlightedLabel &&
-        this._highlightedLabel === Session.label3dList.selectedLabel) {
-      this._mouseDownOnSelection = true
-      if (Session.label3dList.control.attached()) {
-        const consumed = Session.label3dList.control.onMouseDown(camera)
-        if (consumed) {
-          return false
-        }
-      }
-    }
-
     if (this._highlightedLabel) {
       const consumed = this._highlightedLabel.onMouseDown(x, y, camera)
       if (consumed) {
@@ -101,6 +94,16 @@ export class Label3DHandler {
       }
     }
 
+    if (this._mouseOverGroupControl) {
+      this._mouseDownOnSelection = true
+      if (Session.label3dList.control.attached()) {
+        const consumed = Session.label3dList.control.onMouseDown(camera)
+        if (consumed) {
+          return false
+        }
+      }
+    }
+
     return false
   }
 
@@ -108,28 +111,46 @@ export class Label3DHandler {
    * Process mouse up action
    */
   public onMouseUp (): boolean {
+    const labelList = Session.label3dList
     this._mouseDownOnSelection = false
     let consumed = false
-    if (Session.label3dList.control.attached()) {
-      consumed = Session.label3dList.control.onMouseUp()
+    if (labelList.control.attached()) {
+      consumed = labelList.control.onMouseUp()
     }
-    if (!consumed && Session.label3dList.selectedLabel) {
-      Session.label3dList.selectedLabel.onMouseUp()
+    if (!consumed && labelList.selectedLabelGroup) {
+      for (const cube of labelList.selectedLabelGroup.children) {
+        if (cube === labelList.control || cube === labelList.boundingBox) {
+          continue
+        }
+        const labelId = (cube as Cube3D).label.labelId
+        Session.label3dList.labels[labelId].onMouseUp()
+      }
     }
-    if (this._labelChanged && Session.label3dList.selectedLabel) {
-      const [ids,,shapes] = Session.label3dList.selectedLabel.shapeObjects()
+    if (this._labelChanged) {
+      let ids: number[] = []
+      let shapes: ShapeType[] = []
+      for (const cube of labelList.selectedLabelGroup.children) {
+        if (cube === labelList.control || cube === labelList.boundingBox) {
+          continue
+        }
+        cube.applyMatrix(labelList.selectedLabelGroup.matrix)
+        const labelId = (cube as Cube3D).label.labelId
+        const label = Session.label3dList.labels[labelId]
+        const [labelIds,,labelShapes] = label.shapeObjects()
+        ids = ids.concat(labelIds)
+        shapes = shapes.concat(labelShapes)
+        if (Session.tracking && label.label.track in Session.tracks) {
+          Session.tracks[label.label.track].onLabelUpdated(
+            this._selectedItemIndex,
+            labelShapes
+          )
+        }
+      }
       Session.dispatch(changeShapes(
         this._selectedItemIndex,
         ids,
         shapes
       ))
-      const label = Session.label3dList.selectedLabel.label
-      if (Session.tracking && label.track in Session.tracks) {
-        Session.tracks[label.track].onLabelUpdated(
-          this._selectedItemIndex,
-          shapes
-        )
-      }
     }
     this._labelChanged = false
     return false
@@ -147,15 +168,24 @@ export class Label3DHandler {
     camera: THREE.Camera,
     raycastIntersection?: THREE.Intersection
   ): boolean {
-    if (this._mouseDownOnSelection && Session.label3dList.selectedLabel) {
+    const labelList = Session.label3dList
+    if (this._mouseDownOnSelection) {
       this._labelChanged = true
-      if (Session.label3dList.control.attached()) {
-        const consumed = Session.label3dList.control.onMouseMove(x, y, camera)
+      if (labelList.control.attached()) {
+        const consumed = labelList.control.onMouseMove(x, y, camera)
         if (consumed) {
           return true
         }
       }
-      Session.label3dList.selectedLabel.onMouseMove(x, y, camera)
+      if (labelList.selectedLabelGroup.children.length === 2) {
+        for (const cube of labelList.selectedLabelGroup.children) {
+          if (cube === labelList.control || cube === labelList.boundingBox) {
+            continue
+          }
+          const labelId = (cube as Cube3D).label.labelId
+          Session.label3dList.labels[labelId].onMouseMove(x, y, camera)
+        }
+      }
       return true
     } else {
       this.highlight(raycastIntersection)
@@ -207,7 +237,7 @@ export class Label3DHandler {
       case Key.P_UP:
       case Key.P_LOW:
         if (this._plane) {
-          if (Session.label3dList.selectedLabel === this._plane) {
+          if (this._plane.selected) {
             Session.dispatch(selectLabel(
               Session.label3dList.selectedLabelIds, -1, -1
             ))
@@ -221,10 +251,16 @@ export class Label3DHandler {
           return true
         }
         return false
+      case Key.E_UP:
+      case Key.E_LOW:
+        if (Session.label3dList.selectedLabelGroup.children.length > 3) {
+          return false
+        }
+        break
       default:
         this._keyDownMap[e.key] = true
     }
-    if (Session.label3dList.selectedLabel !== null) {
+    if (Session.label3dList.selectedLabelGroup.children.length > 1) {
       return Session.label3dList.control.onKeyDown(e)
     }
     return false
@@ -244,22 +280,47 @@ export class Label3DHandler {
    * @param point
    */
   private highlight (intersection?: THREE.Intersection) {
+    const labelList = Session.label3dList
+    const control = labelList.control
     if (this._highlightedLabel) {
       this._highlightedLabel.setHighlighted()
-      Session.label3dList.control.setHighlighted()
+      control.setHighlighted()
+    }
+    if (labelList.selectedLabelGroup) {
+      control.setHighlighted()
+      for (const cube of labelList.selectedLabelGroup.children) {
+        if (cube === control || cube === labelList.boundingBox) {
+          continue
+        }
+        const labelId = (cube as Cube3D).label.labelId
+        Session.label3dList.labels[labelId].setHighlighted(intersection)
+      }
     }
     this._highlightedLabel = null
-
+    this._mouseOverGroupControl = false
     if (intersection) {
       const object = intersection.object
-      const label = Session.label3dList.getLabelFromRaycastedObject3D(object)
+      if (object.parent && object.parent.parent &&
+        ((object.parent === control) ||
+        (object.parent.parent === control) ||
+        (object.parent.parent.parent === control))
+      ) {
+        for (const cube of labelList.selectedLabelGroup.children) {
+          if (cube === control || cube === labelList.boundingBox) {
+            continue
+          }
+          const labelId = (cube as Cube3D).label.labelId
+          labelList.labels[labelId].setHighlighted(intersection)
+        }
+        control.setHighlighted(intersection)
+        this._mouseOverGroupControl = true
+      }
+      const label = labelList.getLabelFromRaycastedObject3D(object)
 
       if (label) {
         label.setHighlighted(intersection)
         this._highlightedLabel = label
-        if (this._highlightedLabel === Session.label3dList.selectedLabel) {
-          Session.label3dList.control.setHighlighted(intersection)
-        }
+        control.setHighlighted(intersection)
         return
       }
     }
@@ -279,16 +340,23 @@ export class Label3DHandler {
    */
   private selectHighlighted () {
     if (this._highlightedLabel !== null) {
-      if ((this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) &&
-          this._highlightedLabel !== Session.label3dList.selectedLabel) {
-        Session.dispatch(selectLabel(
-          Session.label3dList.selectedLabelIds,
-          this._selectedItemIndex,
-          this._highlightedLabel.labelId,
-          this._highlightedLabel.category[0],
-          this._highlightedLabel.attributes,
-          true
-        ))
+      if ((this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META))) {
+        if (this._highlightedLabel.selected) {
+          Session.dispatch(unselectLabel(
+            Session.label3dList.selectedLabelIds,
+            this._selectedItemIndex,
+            this._highlightedLabel.labelId
+          ))
+        } else {
+          Session.dispatch(selectLabel(
+            Session.label3dList.selectedLabelIds,
+            this._selectedItemIndex,
+            this._highlightedLabel.labelId,
+            this._highlightedLabel.category[0],
+            this._highlightedLabel.attributes,
+            true
+          ))
+        }
       } else {
         Session.dispatch(selectLabel(
           Session.label3dList.selectedLabelIds,
