@@ -1,6 +1,7 @@
 import { withStyles } from '@material-ui/core/styles'
 import * as React from 'react'
 import Session from '../common/session'
+import { Key } from '../common/types'
 import { Label2DHandler } from '../drawable/2d/label2d_handler'
 import { getCurrentViewerConfig } from '../functional/state_util'
 import { ImageViewerConfigType, State } from '../functional/types'
@@ -226,9 +227,12 @@ export class Label2dViewer extends Viewer<Props> {
       // get mouse position in image coordinates
     const mousePos = this.getMousePos(e)
     const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
-    if (this._labelHandler.onMouseDown(mousePos, labelIndex, handleIndex)) {
-      e.stopPropagation()
+    if (!this.isKeyDown(Key.META) && !this.isKeyDown(Key.CONTROL)) {
+      if (this._labelHandler.onMouseDown(mousePos, labelIndex, handleIndex)) {
+        e.stopPropagation()
+      }
     }
+
     Session.label2dList.onDrawableUpdate()
   }
 
@@ -258,7 +262,7 @@ export class Label2dViewer extends Viewer<Props> {
 
     // TODO: update hovered label
     // grabbing image
-    if (!this.isKeyDown('Control')) {
+    if (!this.isKeyDown(Key.CONTROL) && !this.isKeyDown(Key.META)) {
       this.setDefaultCursor()
     }
 
@@ -305,7 +309,7 @@ export class Label2dViewer extends Viewer<Props> {
 
     const key = e.key
     delete this._keyDownMap[key]
-    if (key === 'Control' || key === 'Meta') {
+    if (key === Key.CONTROL || key === Key.META) {
       // Control or command
       this.setDefaultCursor()
     }

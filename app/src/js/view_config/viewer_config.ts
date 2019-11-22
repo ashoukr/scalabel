@@ -1,7 +1,10 @@
 import * as THREE from 'three'
 import { changeViewerConfig } from '../action/common'
-import { zoomImage } from '../action/image'
 import { dragCamera, moveBack, moveCameraAndTarget, moveDown, moveForward, moveLeft, moveRight, moveUp, rotateCamera, updateLockStatus, zoomCamera } from '../action/point_cloud'
+import {
+  MAX_SCALE,
+  MIN_SCALE
+} from '../view_config/image'
 
 import Session from '../common/session'
 import * as types from '../common/types'
@@ -271,29 +274,23 @@ export default class ViewerConfigUpdater {
             zoomRatio = 1. / zoomRatio
           }
           const config = this._viewerConfig as ImageViewerConfigType
-          const imageZoomAction = zoomImage(
-            zoomRatio,
-            this._viewerId,
-            config
-          )
-          if (imageZoomAction) {
-            Session.dispatch(imageZoomAction)
-            if (this._container) {
-              const displayLeft = zoomRatio * (this._mX + config.displayLeft) -
-                this._mX
-              const displayTop = zoomRatio * (this._mY + config.displayTop) -
-                this._mY
-              const newConfig = {
-                ...this._viewerConfig,
-                displayLeft,
-                displayTop
-              } as ImageViewerConfigType
-              Session.dispatch(changeViewerConfig(
-                this._viewerId,
-                newConfig
-              ))
-            }
+          const newScale = config.viewScale * zoomRatio
+          const newConfig = { ...config }
+          if (newScale >= MIN_SCALE && newScale <= MAX_SCALE) {
+            newConfig.viewScale = newScale
           }
+          if (this._container) {
+            const displayLeft = zoomRatio * (this._mX + config.displayLeft) -
+              this._mX
+            const displayTop = zoomRatio * (this._mY + config.displayTop) -
+              this._mY
+            newConfig.displayLeft = displayLeft
+            newConfig.displayTop = displayTop
+          }
+          Session.dispatch(changeViewerConfig(
+            this._viewerId,
+            newConfig
+          ))
         }
         break
       case types.ViewerConfigTypeName.POINT_CLOUD:

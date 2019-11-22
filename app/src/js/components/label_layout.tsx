@@ -81,7 +81,6 @@ class LabelLayout extends React.Component<Props, State> {
   public onStateUpdated () {
     this.setState(this.layoutState)
     const state = Session.getState()
-    console.log(state.user.layout.rootPane, state.user.layout.panes)
     if (state.user.layout.rootPane in state.user.layout.panes) {
       this._rootPane = state.user.layout.panes[state.user.layout.rootPane]
     }
