@@ -303,6 +303,8 @@ export class Cube3D extends Shape3D {
           break
         }
       }
+    } else if (this._label.selected) {
+      (this._outline.material as THREE.LineBasicMaterial).color.set(0xffff00)
     } else {
       (this._outline.material as THREE.LineBasicMaterial).color.set(0xffffff)
       this._highlighted = false

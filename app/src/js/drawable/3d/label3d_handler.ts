@@ -90,6 +90,7 @@ export class Label3DHandler {
         this._mouseDownOnSelection = true
         // Set current label as selected label
         this.selectHighlighted()
+        this.highlight()
         return false
       }
     }
@@ -282,20 +283,11 @@ export class Label3DHandler {
   private highlight (intersection?: THREE.Intersection) {
     const labelList = Session.label3dList
     const control = labelList.control
-    if (this._highlightedLabel) {
-      this._highlightedLabel.setHighlighted()
-      control.setHighlighted()
+    for (const label in labelList.labels) {
+      const labelId = labelList.labels[label].labelId
+      labelList.labels[labelId].setHighlighted()
     }
-    if (labelList.selectedLabelGroup) {
-      control.setHighlighted()
-      for (const cube of labelList.selectedLabelGroup.children) {
-        if (cube === control || cube === labelList.boundingBox) {
-          continue
-        }
-        const labelId = (cube as Cube3D).label.labelId
-        Session.label3dList.labels[labelId].setHighlighted(intersection)
-      }
-    }
+    control.setHighlighted()
     this._highlightedLabel = null
     this._mouseOverGroupControl = false
     if (intersection) {
@@ -315,6 +307,7 @@ export class Label3DHandler {
         control.setHighlighted(intersection)
         this._mouseOverGroupControl = true
       }
+
       const label = labelList.getLabelFromRaycastedObject3D(object)
 
       if (label) {
