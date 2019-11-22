@@ -316,15 +316,18 @@ class ViewerContainer extends Component<Props> {
    * @param e
    */
   private onMouseDown (e: React.MouseEvent) {
-    this._viewerConfigUpdater.onMouseDown(e)
+    if (e.button === 2) {
+      e.preventDefault()
+    }
+    this._viewerConfigUpdater.onMouseDown(e.clientX, e.clientY, e.button)
   }
 
   /**
    * Handle mouse up
    * @param e
    */
-  private onMouseUp (e: React.MouseEvent) {
-    this._viewerConfigUpdater.onMouseUp(e)
+  private onMouseUp (_e: React.MouseEvent) {
+    this._viewerConfigUpdater.onMouseUp()
   }
 
   /**
@@ -332,7 +335,7 @@ class ViewerContainer extends Component<Props> {
    * @param e
    */
   private onMouseMove (e: React.MouseEvent) {
-    this._viewerConfigUpdater.onMouseMove(e)
+    this._viewerConfigUpdater.onMouseMove(e.clientX, e.clientY)
   }
 
   /**
@@ -340,7 +343,7 @@ class ViewerContainer extends Component<Props> {
    * @param e
    */
   private onDoubleClick (e: React.MouseEvent) {
-    this._viewerConfigUpdater.onDoubleClick(e)
+    this._viewerConfigUpdater.onDoubleClick(e.clientX, e.clientY)
   }
 
   /**
@@ -364,7 +367,8 @@ class ViewerContainer extends Component<Props> {
    * @param e
    */
   private onWheel (e: React.WheelEvent) {
-    this._viewerConfigUpdater.onWheel(e)
+    e.preventDefault()
+    this._viewerConfigUpdater.onWheel(e.deltaY)
   }
 
   /**
@@ -373,7 +377,7 @@ class ViewerContainer extends Component<Props> {
    */
   private onKeyUp (e: KeyboardEvent) {
     if (Session.activeViewerId === this.props.id) {
-      this._viewerConfigUpdater.onKeyUp(e)
+      this._viewerConfigUpdater.onKeyUp(e.key)
     }
   }
 
@@ -383,7 +387,7 @@ class ViewerContainer extends Component<Props> {
    */
   private onKeyDown (e: KeyboardEvent) {
     if (Session.activeViewerId === this.props.id) {
-      this._viewerConfigUpdater.onKeyDown(e)
+      this._viewerConfigUpdater.onKeyDown(e.key)
     }
   }
 }
