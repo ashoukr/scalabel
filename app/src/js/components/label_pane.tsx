@@ -5,6 +5,7 @@ import { updateAll } from '../action/common'
 import Session from '../common/session'
 import { PaneType } from '../functional/types'
 import { resizerStyles } from '../styles/split_pane'
+import { Component } from './component'
 import ViewerContainer, { viewerContainerReactKey } from './viewer_container'
 
 interface ClassType {
@@ -20,7 +21,7 @@ interface Props extends PaneType {
 /**
  * Wrapper for SplitPane
  */
-class LabelPane extends React.Component<Props> {
+class LabelPane extends Component<Props> {
   constructor (props: Props) {
     super(props)
   }
@@ -35,7 +36,12 @@ class LabelPane extends React.Component<Props> {
       />)
     }
 
-    if (!this.props.firstChild || !this.props.secondChild) {
+    if (
+      !this.props.firstChild ||
+      !this.props.secondChild ||
+      !(this.props.firstChild in this.state.user.layout.panes) ||
+      !(this.props.secondChild in this.state.user.layout.panes)
+    ) {
       return null
     }
     if (!this.props.split) {
@@ -45,12 +51,14 @@ class LabelPane extends React.Component<Props> {
       throw new Error('Missing primary size')
     }
 
-    const firstChild = (<StyledLabelPane
-      {...this.props.firstChild}
-    />)
+    const firstPane = this.state.user.layout.panes[this.props.firstChild]
+    const secondPane = this.state.user.layout.panes[this.props.secondChild]
 
+    const firstChild = (<StyledLabelPane
+      {...firstPane}
+    />)
     const secondChild = (<StyledLabelPane
-      {...this.props.secondChild}
+      {...secondPane}
     />)
 
     return (

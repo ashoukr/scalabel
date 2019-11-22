@@ -11,7 +11,7 @@ import {
   IndexedShapeType,
   ItemType,
   LabelType,
-  PaneType,
+  LayoutType,
   Select,
   ShapeType,
   State,
@@ -779,41 +779,6 @@ export function changeViewerConfig (
 }
 
 /**
- * Recursively iterate through pane tree and split
- * @param pane
- */
-function recursivePaneUpdate (
-  pane: PaneType,
-  id: number,
-  updateFn: (pane: PaneType) => PaneType
-): PaneType {
-  // Use updateFn to update pane
-  if (pane.id === id) {
-    return updateFn(pane)
-  }
-
-  // Terminate recursion at leaf
-  if (pane.viewerId >= 0) {
-    return { ...pane }
-  }
-
-  pane = { ...pane }
-  if (pane.firstChild) {
-    pane = updateObject(pane, {
-      firstChild: recursivePaneUpdate(pane.firstChild, id, updateFn)
-    })
-  }
-
-  if (pane.secondChild) {
-    pane = updateObject(pane, {
-      secondChild: recursivePaneUpdate(pane.secondChild, id, updateFn)
-    })
-  }
-
-  return pane
-}
-
-/**
  * Split existing pane into half
  * @param state
  * @param action
@@ -821,6 +786,10 @@ function recursivePaneUpdate (
 export function splitPane (
   state: State, action: types.SplitPaneAction
 ): State {
+  if (!(action.pane in state.user.layout.panes)) {
+    return state
+  }
+
   const firstPaneId = state.user.layout.maxPaneId + 1
   const secondPaneId = state.user.layout.maxPaneId + 2
 
@@ -829,29 +798,25 @@ export function splitPane (
   newViewerConfig.pane = secondPaneId
   const newViewerConfigId = state.user.layout.maxViewerConfigId + 1
 
-  const newRootPane = recursivePaneUpdate(
-    state.user.layout.rootPane,
-    action.pane,
-    (pane: PaneType) => {
-      const firstChild = makePane(
-        pane.viewerId,
-        firstPaneId
-      )
-
-      const secondChild = makePane(
-        newViewerConfigId,
-        secondPaneId
-      )
-
-      return updateObject(pane, {
-        viewerId: -1,
-        split: action.split,
-        primarySize: 50,
-        firstChild,
-        secondChild
-      })
-    }
+  const oldPane = state.user.layout.panes[action.pane]
+  const firstChild = makePane(
+    oldPane.viewerId,
+    firstPaneId,
+    oldPane.id
   )
+  const secondChild = makePane(
+    newViewerConfigId,
+    secondPaneId,
+    oldPane.id
+  )
+
+  const newPane = updateObject(oldPane, {
+    viewerId: -1,
+    split: action.split,
+    primarySize: 50,
+    firstChild: firstPaneId,
+    secondChild: secondPaneId
+  })
 
   const newViewerConfigs = updateObject(
     state.user.viewerConfigs,
@@ -869,7 +834,14 @@ export function splitPane (
     {
       maxViewerConfigId: newViewerConfigId,
       maxPaneId: secondPaneId,
-      rootPane: newRootPane
+      panes: updateObject(
+        state.user.layout.panes,
+        {
+          [newPane.id]: newPane,
+          [firstPaneId]: firstChild,
+          [secondPaneId]: secondChild
+        }
+      )
     }
   )
 
@@ -888,53 +860,74 @@ export function splitPane (
 export function deletePane (
   state: State, action: types.DeletePaneAction
 ): State {
-  const searchQueue: PaneType[] = []
-  if (action.pane !== state.user.layout.rootPane.id) {
-    searchQueue.push(state.user.layout.rootPane)
+  const panes = state.user.layout.panes
+  if (action.pane === state.user.layout.rootPane || !(action.pane in panes)) {
+    return state
   }
-  while (searchQueue.length > 0) {
-    const pane = searchQueue.pop() as PaneType
-    if (pane.viewerId >= 0 || !pane.firstChild || !pane.secondChild) {
-      continue
+
+  const parentId = panes[action.pane].parent
+
+  if (!(parentId in panes)) {
+    return state
+  }
+
+  const parent = panes[parentId]
+
+  // Shallow copy of panes and modification of dictionary
+  const newPanes = { ...panes }
+
+  // Get id of the child that is not the pane that will be deleted
+  let newLeafId: number = -1
+  if (parent.firstChild === action.pane && parent.secondChild) {
+    newLeafId = parent.secondChild
+  } else if (parent.secondChild === action.pane && parent.firstChild) {
+    newLeafId = parent.firstChild
+  } else {
+    return state
+  }
+
+  if (!(newLeafId in panes)) {
+    return state
+  }
+
+  let newParentId = -1
+  if (parentId !== state.user.layout.rootPane) {
+    newParentId = parent.parent
+    if (!(newParentId in panes)) {
+      return state
     }
 
-    let newLeaf: PaneType | undefined
-    if (pane.firstChild.id === action.pane) {
-      newLeaf = pane.secondChild
-    } else if (pane.secondChild.id === action.pane) {
-      newLeaf = pane.firstChild
-    }
+    let newParent = panes[newParentId]
 
-    if (newLeaf) {
-      const newRootPane = recursivePaneUpdate(
-        state.user.layout.rootPane,
-        pane.id,
-        (found: PaneType) => {
-          return updateObject(found, newLeaf as PaneType)
-        }
-      )
-
-      const newLayout = updateObject(
-        state.user.layout,
-        {
-          rootPane: newRootPane
-        }
-      )
-
-      return updateObject(
-        state,
-        {
-          user: updateObject(
-            state.user,
-            { layout: newLayout }
-          )
-        }
-      )
+    // Flatten tree by removing old parent from the parent of the old parent and
+    // replacing with the new leaf
+    if (parentId === newParent.firstChild) {
+      newParent = updateObject(newParent, { firstChild: newLeafId })
+    } else if (parentId === newParent.secondChild) {
+      newParent = updateObject(newParent, { secondChild: newLeafId })
     } else {
-      searchQueue.push(pane.firstChild)
-      searchQueue.push(pane.secondChild)
+      return state
     }
+
+    newPanes[newParentId] = newParent
   }
 
-  return state
+  delete newPanes[parentId]
+  delete newPanes[action.pane]
+  newPanes[newLeafId] = updateObject(panes[newLeafId], { parent: newParentId })
+  const updateParams: Partial<LayoutType> = { panes: newPanes }
+
+  if (parentId === state.user.layout.rootPane) {
+    updateParams.rootPane = newLeafId
+  }
+
+  return updateObject(
+    state,
+    {
+      user: updateObject(
+        state.user,
+        { layout: updateObject(state.user.layout, updateParams) }
+      )
+    }
+  )
 }

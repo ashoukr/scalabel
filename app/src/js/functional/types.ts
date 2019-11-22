@@ -274,22 +274,30 @@ export enum SplitType {
 export interface PaneType {
   /** id of the pane */
   id: number
+  /** id of parent pane, negative for root */
+  parent: number
   /** If leaf, >= 0 */
   viewerId: number
-  /** Current size in percentage, must be > 0 for non leaf  */
+  /**
+   * Size of primary pane in percentage.
+   * Look at react-split-pane for more details
+   */
   primarySize?: number
-  /** which child is primary */
+  /**
+   * Which child is the primary pane to apply sizing to.
+   * Look at react-split-pane for more details
+   */
   primary?: 'first' | 'second'
-  /** Split type */
+  /** Split type, horizontal or vertical */
   split?: SplitType
-  /** Min size */
+  /** Min size of primary pane */
   minPrimarySize?: number
-  /** Max size */
+  /** Max size of primary pane */
   maxPrimarySize?: number
-  /** First child if this is not leaf */
-  firstChild?: PaneType
-  /** Second child if this is not leaf */
-  secondChild?: PaneType
+  /** Id of first child if not leaf */
+  firstChild?: number
+  /** Id of second child if not leaf */
+  secondChild?: number
 }
 
 export interface LayoutType {
@@ -300,7 +308,9 @@ export interface LayoutType {
   /** max viewer config id */
   maxPaneId: number
   /** top level pane node */
-  rootPane: PaneType
+  rootPane: number
+  /** map between pane id and pane states */
+  panes: {[id: number]: PaneType}
 }
 
 export interface TaskStatus {

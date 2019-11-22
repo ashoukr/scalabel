@@ -5,8 +5,8 @@ import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
 import Session from '../common/session'
-import { makeLayout } from '../functional/states'
-import { LayoutType } from '../functional/types'
+import { makePane } from '../functional/states'
+import { PaneType } from '../functional/types'
 import { LayoutStyles } from '../styles/label'
 import LabelPane from './label_pane'
 import PlayerControl from './player_control'
@@ -62,8 +62,8 @@ class LabelLayout extends React.Component<Props, State> {
   /** The state of the layout */
   public layoutState: LayoutState
 
-  /** redux layout state */
-  private _layout: LayoutType
+  /** root pane */
+  private _rootPane: PaneType
 
   /**
    * @param {object} props
@@ -71,7 +71,7 @@ class LabelLayout extends React.Component<Props, State> {
   constructor (props: any) {
     super(props)
     this.layoutState = { left_size: 0, center_size: 0, right_size: 0 }
-    this._layout = makeLayout()
+    this._rootPane = makePane()
     Session.subscribe(this.onStateUpdated.bind(this))
   }
 
@@ -81,7 +81,10 @@ class LabelLayout extends React.Component<Props, State> {
   public onStateUpdated () {
     this.setState(this.layoutState)
     const state = Session.getState()
-    this._layout = state.user.layout
+    console.log(state.user.layout.rootPane, state.user.layout.panes)
+    if (state.user.layout.rootPane in state.user.layout.panes) {
+      this._rootPane = state.user.layout.panes[state.user.layout.rootPane]
+    }
   }
 
   /**
@@ -186,7 +189,9 @@ class LabelLayout extends React.Component<Props, State> {
           outline: 'none', width: '100%', background: '#222222'
         }}
       >
-        <LabelPane {...this._layout.rootPane} key={'rootPane'} />
+        <LabelPane
+          {...this._rootPane} key={'rootPane'}
+        />
         { playerControl }
       </div >
     )

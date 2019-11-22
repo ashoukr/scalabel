@@ -285,17 +285,19 @@ export function makeTaskConfig (params: Partial<ConfigType> = {}): ConfigType {
 export function makePane (
   viewerId: number = -1,
   paneId: number = -1,
+  parent: number = -1,
   primarySize?: number,
   split?: SplitType,
   primary?: 'first' | 'second',
   minPrimarySize?: number,
   maxPrimarySize?: number,
-  firstChild?: PaneType,
-  secondChild?: PaneType
+  firstChild?: number,
+  secondChild?: number
 ): PaneType {
   return {
     id: paneId,
     viewerId,
+    parent,
     primary,
     primarySize,
     split,
@@ -316,7 +318,8 @@ export function makeLayout (params: {} = {}): LayoutType {
     toolbarWidth: 200,
     maxViewerConfigId: 0,
     maxPaneId: 0,
-    rootPane: makePane(0, 0),
+    rootPane: 0,
+    panes: { [0]: makePane(0, 0) },
     ...params
   }
 }
