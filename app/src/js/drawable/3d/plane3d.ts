@@ -27,6 +27,11 @@ export class Plane3D extends Label3D {
     this._shape.render(scene)
   }
 
+  /** Add plane to selected group */
+  public addToSelectedGroup (group: THREE.Group) {
+    group.add(this._shape)
+  }
+
   /** Attach control */
   public attachControl (control: TransformationControl): void {
     this._shape.attachControl(control)

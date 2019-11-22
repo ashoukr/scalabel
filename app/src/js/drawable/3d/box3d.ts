@@ -72,6 +72,11 @@ export class Box3D extends Label3D {
     ]
   }
 
+  /** Add cube to selected group */
+  public addToSelectedGroup (group: THREE.Group) {
+    group.add(this._shape)
+  }
+
   /** Attach label to plane */
   public attachToPlane (plane: Plane3D) {
     super.attachToPlane(plane)

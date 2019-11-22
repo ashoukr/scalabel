@@ -58,6 +58,9 @@ export abstract class Label3D {
     return this._labelId
   }
 
+  /** Add label to selected group */
+  public abstract addToSelectedGroup (group: THREE.Group): void
+
   /** get label state */
   public get label (): Readonly<LabelType> {
     if (!this._label) {
