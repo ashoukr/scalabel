@@ -22,5 +22,13 @@ export const viewerContainerStyles = () => createStyles({
   icon90: {
     color: '#ced4da',
     transform: 'rotate(90deg)'
+  },
+  viewer_container: {
+    display: 'block',
+    height: '100%',
+    position: 'absolute',
+    overflow: 'hidden',
+    outline: 'none',
+    width: '100%'
   }
 })

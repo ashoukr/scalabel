@@ -55,6 +55,8 @@ interface ClassType {
   icon: string
   /** icon rotated */
   icon90: string
+  /** container */
+  viewer_container: string
 }
 
 interface Props {
@@ -179,6 +181,94 @@ class ViewerContainer extends Component<Props> {
       }
     }
 
+    const viewerTypeMenu = (
+      <Select
+        value={
+          (this._viewerConfig) ? this._viewerConfig.type :
+            types.ViewerConfigTypeName.UNKNOWN
+        }
+        onChange={(e) => {
+          if (this._viewerConfig) {
+            const newConfig = makeViewerConfig(
+              e.target.value as types.ViewerConfigTypeName,
+              this._viewerConfig.pane,
+              this._viewerConfig.sensor
+            )
+            if (newConfig) {
+              Session.dispatch(changeViewerConfig(
+                this.props.id,
+                newConfig
+              ))
+            }
+          }
+        }}
+        classes={{ select: this.props.classes.select }}
+        inputProps={{
+          classes: {
+            icon: this.props.classes.icon
+          }
+        }}
+      >
+        <MenuItem value={types.ViewerConfigTypeName.IMAGE}>Image</MenuItem>
+        <MenuItem value={types.ViewerConfigTypeName.POINT_CLOUD}>
+          Point Cloud
+        </MenuItem>
+        <MenuItem value={types.ViewerConfigTypeName.IMAGE_3D}>
+          Image 3D
+        </MenuItem>
+      </Select>
+    )
+
+    const verticalSplitButton = (
+      <IconButton
+        className={this.props.classes.icon90}
+        onClick={() => {
+          if (this._viewerConfig) {
+            Session.dispatch(splitPane(
+              this._viewerConfig.pane,
+              SplitType.VERTICAL,
+              this.props.id
+            ))
+          }
+        }}
+      >
+        <ViewStreamIcon />
+      </IconButton>
+    )
+
+    const horizontalSplitButton = (
+      <IconButton
+        className={this.props.classes.icon}
+        onClick={() => {
+          if (this._viewerConfig) {
+            Session.dispatch(splitPane(
+              this._viewerConfig.pane,
+              SplitType.HORIZONTAL,
+              this.props.id
+            ))
+          }
+        }}
+      >
+        <ViewStreamIcon />
+      </IconButton>
+    )
+
+    const deleteButton = (
+      <IconButton
+        className={this.props.classes.icon}
+        onClick={() => {
+          if (this._viewerConfig) {
+            Session.dispatch(deletePane(
+              this._viewerConfig.pane,
+              this.props.id
+            ))
+          }
+        }}
+      >
+        <CloseIcon />
+      </IconButton>
+    )
+
     const viewerContainerBar = (
         <Grid
           justify={'flex-end'}
@@ -188,105 +278,10 @@ class ViewerContainer extends Component<Props> {
             container: this.props.classes.viewer_container_bar
           }}
         >
-          <Select
-            value={
-              (this._viewerConfig) ? this._viewerConfig.type :
-                types.ViewerConfigTypeName.UNKNOWN
-            }
-            onChange={(e) => {
-              if (this._viewerConfig) {
-                const newConfig = makeViewerConfig(
-                  e.target.value as types.ViewerConfigTypeName,
-                  this._viewerConfig.pane,
-                  this._viewerConfig.sensor
-                )
-                if (newConfig) {
-                  Session.dispatch(changeViewerConfig(
-                    this.props.id,
-                    newConfig
-                  ))
-                }
-              }
-            }}
-            classes={{ select: this.props.classes.select }}
-            inputProps={{
-              classes: {
-                icon: this.props.classes.icon
-              }
-            }}
-          >
-            <MenuItem value={types.ViewerConfigTypeName.IMAGE}>Image</MenuItem>
-            <MenuItem value={types.ViewerConfigTypeName.POINT_CLOUD}>
-              Point Cloud
-            </MenuItem>
-            <MenuItem value={types.ViewerConfigTypeName.IMAGE_3D}>
-              Image 3D
-            </MenuItem>
-          </Select>
-          <Select
-            value={
-              (this._viewerConfig) ? this._viewerConfig.sensor : null
-            }
-            // onChange={
-            //   this.handleItemTypeChange
-            // }
-            classes={{ select: this.props.classes.select }}
-            inputProps={{
-              classes: {
-                icon: this.props.classes.icon
-              }
-            }}
-          >
-            {Object.keys(this.state.task.sensors).filter((key) =>
-              (this._viewerConfig) ?
-                this.state.task.sensors[Number(key)].type ===
-                  this._viewerConfig.type :
-                false
-            ).map((key) =>
-              <MenuItem value={Number(key)}>{key}</MenuItem>
-            )}
-          </Select>
-          <IconButton
-            className={this.props.classes.icon90}
-            onClick={() => {
-              if (this._viewerConfig) {
-                Session.dispatch(splitPane(
-                  this._viewerConfig.pane,
-                  SplitType.VERTICAL,
-                  this.props.id
-                ))
-              }
-            }}
-          >
-            <ViewStreamIcon />
-          </IconButton>
-          <IconButton
-            className={this.props.classes.icon}
-            onClick={() => {
-              if (this._viewerConfig) {
-                Session.dispatch(splitPane(
-                  this._viewerConfig.pane,
-                  SplitType.HORIZONTAL,
-                  this.props.id
-                ))
-              }
-            }}
-          >
-            <ViewStreamIcon />
-          </IconButton>
-          <IconButton
-            className={this.props.classes.icon}
-            onClick={() => {
-              if (this._viewerConfig) {
-                Session.dispatch(deletePane(
-                  this._viewerConfig.pane,
-                  this.props.id
-                ))
-              }
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
+          {viewerTypeMenu}
+          {verticalSplitButton}
+          {horizontalSplitButton}
+          {deleteButton}
         </Grid>
     )
 
@@ -301,14 +296,7 @@ class ViewerContainer extends Component<Props> {
               this.forceUpdate()
             }
           }}
-          style={{
-            display: 'block',
-            height: '100%',
-            position: 'absolute',
-            overflow: 'hidden',
-            outline: 'none',
-            width: '100%'
-          }}
+          className={this.props.classes.viewer_container}
           onMouseDown={ (e) => this.onMouseDown(e) }
           onMouseUp={ (e) => this.onMouseUp(e) }
           onMouseMove={ (e) => this.onMouseMove(e) }
