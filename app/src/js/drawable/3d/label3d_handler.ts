@@ -283,8 +283,8 @@ export class Label3DHandler {
   private highlight (intersection?: THREE.Intersection) {
     const labelList = Session.label3dList
     const control = labelList.control
-    for (const label in labelList.labels) {
-      const labelId = labelList.labels[label].labelId
+    for (const key of Object.keys(labelList.labels)) {
+      const labelId = labelList.labels[Number(key)].labelId
       labelList.labels[labelId].setHighlighted()
     }
     control.setHighlighted()
