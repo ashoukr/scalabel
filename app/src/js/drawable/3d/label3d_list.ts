@@ -176,7 +176,6 @@ export class Label3DList {
     const select = state.user.select
     if (select.item in select.labels) {
       const selectedLabelIds = select.labels[select.item]
-
       // Special behavior if there is only one label
       // axis align control, no bounding box
       if (selectedLabelIds.length === 1 &&
@@ -286,8 +285,11 @@ export class Label3DList {
    */
   private addLabelsToGroup (labelIds: number[]) {
     for (const labelId of labelIds) {
-      this._labels[labelId].selected = true
-      this._labels[labelId].addToSelectedGroup(this._selectedLabelGroup)
+      const label = this._labels[labelId]
+      if (label) {
+        label.selected = true
+        label.addToSelectedGroup(this._selectedLabelGroup)
+      }
     }
   }
 }
