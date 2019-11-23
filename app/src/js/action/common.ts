@@ -289,27 +289,27 @@ export function changeViewerConfig (
 export function splitPane (
   pane: number,
   split: SplitType,
-  viewerConfig: number
+  viewerId: number
 ): types.SplitPaneAction {
   return {
     type: types.SPLIT_PANE,
     sessionId: Session.id,
     pane,
     split,
-    viewerConfig
+    viewerId
   }
 }
 
 /** action to delete pane */
 export function deletePane (
   pane: number,
-  viewerConfig: number
+  viewerId: number
 ): types.DeletePaneAction {
   return {
     type: types.DELETE_PANE,
     sessionId: Session.id,
     pane,
-    viewerConfig
+    viewerId
   }
 }
 

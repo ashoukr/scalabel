@@ -279,15 +279,15 @@ export interface PaneType {
   /** If leaf, >= 0 */
   viewerId: number
   /**
-   * Size of primary pane in percentage.
-   * Look at react-split-pane for more details
-   */
-  primarySize?: number
-  /**
    * Which child is the primary pane to apply sizing to.
-   * Look at react-split-pane for more details
+   * Other child is sized based on the size of the primary child
+   * (100% - primary width)
    */
   primary?: 'first' | 'second'
+  /**
+   * Size of primary pane in percentage.
+   */
+  primarySize?: number
   /** Split type, horizontal or vertical */
   split?: SplitType
   /** Min size of primary pane */

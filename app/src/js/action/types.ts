@@ -155,7 +155,7 @@ export interface SplitPaneAction extends BaseAction {
   /** ID of pane to split */
   pane: number
   /** ID of corresponding viewer config */
-  viewerConfig: number
+  viewerId: number
   /** Split direction */
   split: SplitType
 }
@@ -164,7 +164,7 @@ export interface DeletePaneAction extends BaseAction {
   /** ID of pane to split */
   pane: number
   /** ID of corresponding viewer config */
-  viewerConfig: number
+  viewerId: number
 }
 
 export type SessionActionType =

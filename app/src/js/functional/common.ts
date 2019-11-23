@@ -790,23 +790,23 @@ export function splitPane (
     return state
   }
 
-  const firstPaneId = state.user.layout.maxPaneId + 1
-  const secondPaneId = state.user.layout.maxPaneId + 2
+  const firstChildId = state.user.layout.maxPaneId + 1
+  const secondChildId = state.user.layout.maxPaneId + 2
 
-  const oldViewerConfig = state.user.viewerConfigs[action.viewerConfig]
+  const oldViewerConfig = state.user.viewerConfigs[action.viewerId]
   const newViewerConfig = _.cloneDeep(oldViewerConfig)
-  newViewerConfig.pane = secondPaneId
+  newViewerConfig.pane = secondChildId
   const newViewerConfigId = state.user.layout.maxViewerConfigId + 1
 
   const oldPane = state.user.layout.panes[action.pane]
   const firstChild = makePane(
     oldPane.viewerId,
-    firstPaneId,
+    firstChildId,
     oldPane.id
   )
   const secondChild = makePane(
     newViewerConfigId,
-    secondPaneId,
+    secondChildId,
     oldPane.id
   )
 
@@ -814,16 +814,16 @@ export function splitPane (
     viewerId: -1,
     split: action.split,
     primarySize: 50,
-    firstChild: firstPaneId,
-    secondChild: secondPaneId
+    firstChild: firstChildId,
+    secondChild: secondChildId
   })
 
   const newViewerConfigs = updateObject(
     state.user.viewerConfigs,
     {
-      [action.viewerConfig]: updateObject(
+      [action.viewerId]: updateObject(
         oldViewerConfig,
-        { pane: firstPaneId }
+        { pane: firstChildId }
       ),
       [newViewerConfigId]: newViewerConfig
     }
@@ -833,13 +833,13 @@ export function splitPane (
     state.user.layout,
     {
       maxViewerConfigId: newViewerConfigId,
-      maxPaneId: secondPaneId,
+      maxPaneId: secondChildId,
       panes: updateObject(
         state.user.layout.panes,
         {
           [newPane.id]: newPane,
-          [firstPaneId]: firstChild,
-          [secondPaneId]: secondChild
+          [firstChildId]: firstChild,
+          [secondChildId]: secondChild
         }
       )
     }

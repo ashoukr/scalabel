@@ -187,21 +187,7 @@ class ViewerContainer extends Component<Props> {
           (this._viewerConfig) ? this._viewerConfig.type :
             types.ViewerConfigTypeName.UNKNOWN
         }
-        onChange={(e) => {
-          if (this._viewerConfig) {
-            const newConfig = makeViewerConfig(
-              e.target.value as types.ViewerConfigTypeName,
-              this._viewerConfig.pane,
-              this._viewerConfig.sensor
-            )
-            if (newConfig) {
-              Session.dispatch(changeViewerConfig(
-                this.props.id,
-                newConfig
-              ))
-            }
-          }
-        }}
+        onChange={this.handleViewerTypeChange}
         classes={{ select: this.props.classes.select }}
         inputProps={{
           classes: {
@@ -309,6 +295,30 @@ class ViewerContainer extends Component<Props> {
         </div>
       </div>
     )
+  }
+
+  /** Handle viewer type select change */
+  private handleViewerTypeChange (
+    e: React.ChangeEvent<{
+      /** Inherited from material ui */
+      name?: string;
+      /** Inherited from material ui */
+      value: unknown
+    }>
+  ): void {
+    if (this._viewerConfig) {
+      const newConfig = makeViewerConfig(
+        e.target.value as types.ViewerConfigTypeName,
+        this._viewerConfig.pane,
+        this._viewerConfig.sensor
+      )
+      if (newConfig) {
+        Session.dispatch(changeViewerConfig(
+          this.props.id,
+          newConfig
+        ))
+      }
+    }
   }
 
   /**
