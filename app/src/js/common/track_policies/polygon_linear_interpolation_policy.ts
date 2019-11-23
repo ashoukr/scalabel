@@ -25,7 +25,7 @@ export class LinearInterpolationPolygonPolicy extends TrackPolicy {
     label: Label,
     sensors: number[]
   ) {
-    const rect = ((label as Polygon2D).shapes[0]).toRect()
+    const polygon = ((label as Polygon2D).points[0]).toPathPoint()
     const labelObject = makeLabel({
       type: types.LabelTypeName.POLYGON_2D,
       category: label.category,
@@ -37,7 +37,7 @@ export class LinearInterpolationPolygonPolicy extends TrackPolicy {
       Session.dispatch(addDuplicatedTrack(
         labelObject,
         [types.ShapeTypeName.RECT],
-        [rect],
+        [polygon],
         itemIndex
       ))
     }

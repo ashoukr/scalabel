@@ -58,6 +58,13 @@ export class Polygon2D extends Label2D {
   }
 
   /**
+   * Return a list of the points for inspection and testing
+   */
+  public get points (): Array<Readonly<PathPoint2D>> {
+    return this._points
+  }
+
+  /**
    * Draw the label on viewing or control canvas
    * @param _context
    * @param _ratio
