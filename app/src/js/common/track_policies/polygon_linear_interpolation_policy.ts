@@ -13,6 +13,7 @@ export class LinearInterpolationPolygonPolicy extends TrackPolicy {
     super(track)
     this._policyType = types.TrackPolicyType.LINEAR_INTERPOLATION_POLYGON
   }
+
   /**
    * Callback for label creation
    * @param itemIndex
@@ -36,7 +37,7 @@ export class LinearInterpolationPolygonPolicy extends TrackPolicy {
     if (state.task.config.tracking) {
       Session.dispatch(addDuplicatedTrack(
         labelObject,
-        [types.ShapeTypeName.RECT],
+        [types.ShapeTypeName.POLYGON_2D],
         [polygon],
         itemIndex
       ))
