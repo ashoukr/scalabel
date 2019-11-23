@@ -10,6 +10,7 @@ import { Label3DHandler } from '../../js/drawable/3d/label3d_handler'
 import { getCurrentViewerConfig, getShape } from '../../js/functional/state_util'
 import { makePointCloudViewerConfig } from '../../js/functional/states'
 import { CubeType, PointCloudViewerConfigType } from '../../js/functional/types'
+// import { Cube3D } from '../../js/drawable/3d/cube3d'
 import { Vector3D } from '../../js/math/vector3d'
 import { updateThreeCameraAndRenderer } from '../../js/view_config/point_cloud'
 import { testJson } from '../test_point_cloud_objects'
@@ -67,6 +68,29 @@ function getActiveAxisForRotation (camLoc: number, axis: number) {
       return 0
     }
   }
+}
+
+/**
+ * Get intersections
+ * @param raycaster
+ */
+function getIntersections (raycaster: THREE.Raycaster) {
+  const raycastableShapes = Session.label3dList.raycastableShapes
+  const shapes = (raycastableShapes.slice() as unknown as THREE.Object3D[])
+  const control = Session.label3dList.control
+  const intersectsControl = control ?
+    raycaster.intersectObjects(
+      [control], false
+    ) :
+    raycaster.intersectObjects(
+      [], false
+    )
+  const intersections = intersectsControl && intersectsControl.length > 0 ?
+    intersectsControl :
+    raycaster.intersectObjects(
+      shapes, false
+    )
+  return intersections
 }
 
 /**
@@ -179,18 +203,16 @@ test('Move axis aligned 3d bbox along z axis', () => {
   updateThreeCameraAndRenderer(viewerConfig, camera)
   camera.updateMatrixWorld(true)
 
-  const raycastableShapes = Session.label3dList.raycastableShapes
-
   const raycaster = new THREE.Raycaster()
   raycaster.near = 1.0
   raycaster.far = 100.0
   raycaster.linePrecision = 0.02
 
   raycaster.setFromCamera(new THREE.Vector2(0, 0.1), camera)
-  let intersections =
-    raycaster.intersectObjects(raycastableShapes as unknown as THREE.Object3D[])
-  expect(intersections.length).toBeGreaterThan(0)
 
+  let intersections = getIntersections(raycaster)
+
+  expect(intersections.length).toBeGreaterThan(0)
   label3dHandler.onMouseMove(0, 0.1, camera, intersections[0])
   label3dHandler.onMouseDown(0, 0.1, camera)
   label3dHandler.onMouseMove(0, 0.5, camera)
@@ -204,8 +226,7 @@ test('Move axis aligned 3d bbox along z axis', () => {
   expect(center[1]).toBeCloseTo(0)
 
   raycaster.setFromCamera(new THREE.Vector2(0, 0.5), camera)
-  intersections =
-    raycaster.intersectObjects(raycastableShapes as unknown as THREE.Object3D[])
+  intersections = getIntersections(raycaster)
   expect(intersections.length).toBeGreaterThan(0)
 
   label3dHandler.onMouseMove(0, 0.5, camera, intersections[0])
@@ -262,8 +283,6 @@ test('Move axis aligned 3d bbox along all axes', () => {
     updateThreeCameraAndRenderer(viewerConfig, camera)
     camera.updateMatrixWorld(true)
 
-    const raycastableShapes = Session.label3dList.raycastableShapes
-
     const raycaster = new THREE.Raycaster()
     raycaster.near = 1.0
     raycaster.far = 100.0
@@ -280,8 +299,7 @@ test('Move axis aligned 3d bbox along all axes', () => {
       const vecY = .1 * (axis <= 1 ? 1 : 0) * (neg ? -1 : 1)
 
       raycaster.setFromCamera(new THREE.Vector2(vecX, vecY), camera)
-      let intersections = raycaster.intersectObjects(
-        raycastableShapes as unknown as THREE.Object3D[])
+      let intersections = getIntersections(raycaster)
       expect(intersections.length).toBeGreaterThan(0)
 
       label3dHandler.onMouseMove(vecX, vecY, camera, intersections[0])
@@ -307,8 +325,8 @@ test('Move axis aligned 3d bbox along all axes', () => {
       }
 
       raycaster.setFromCamera(new THREE.Vector2(5 * vecX, 5 * vecY), camera)
-      intersections = raycaster.intersectObjects(
-        raycastableShapes as unknown as THREE.Object3D[])
+
+      intersections = getIntersections(raycaster)
       expect(intersections.length).toBeGreaterThan(0)
 
       label3dHandler.onMouseMove(5 * vecX, 5 * vecY, camera, intersections[0])
@@ -367,8 +385,6 @@ test('Scale axis aligned 3d bbox along all axes', () => {
     updateThreeCameraAndRenderer(viewerConfig, camera)
     camera.updateMatrixWorld(true)
 
-    const raycastableShapes = Session.label3dList.raycastableShapes
-
     const raycaster = new THREE.Raycaster()
     raycaster.near = 1.0
     raycaster.far = 100.0
@@ -385,8 +401,7 @@ test('Scale axis aligned 3d bbox along all axes', () => {
       const vecY = .1 * (axis <= 1 ? 1 : 0) * (neg ? -1 : 1)
 
       raycaster.setFromCamera(new THREE.Vector2(vecX, vecY), camera)
-      let intersections = raycaster.intersectObjects(
-        raycastableShapes as unknown as THREE.Object3D[])
+      let intersections = getIntersections(raycaster)
       expect(intersections.length).toBeGreaterThan(0)
 
       label3dHandler.onMouseMove(vecX, vecY, camera, intersections[0])
@@ -418,8 +433,7 @@ test('Scale axis aligned 3d bbox along all axes', () => {
       }
 
       raycaster.setFromCamera(new THREE.Vector2(5 * vecX, 5 * vecY), camera)
-      intersections = raycaster.intersectObjects(
-        raycastableShapes as unknown as THREE.Object3D[])
+      intersections = getIntersections(raycaster)
       expect(intersections.length).toBeGreaterThan(0)
 
       label3dHandler.onMouseMove(5 * vecX, 5 * vecY, camera, intersections[0])
@@ -483,8 +497,6 @@ test('Rotate axis aligned 3d bbox around all axes', () => {
       updateThreeCameraAndRenderer(viewerConfig, camera)
       camera.updateMatrixWorld(true)
 
-      const raycastableShapes = Session.label3dList.raycastableShapes
-
       const raycaster = new THREE.Raycaster()
       raycaster.near = 1.0
       raycaster.far = 100.0
@@ -498,8 +510,7 @@ test('Rotate axis aligned 3d bbox around all axes', () => {
       const vecY = .1 * (axis <= 1 ? 1 : 0) * (neg ? -1 : 1)
 
       raycaster.setFromCamera(new THREE.Vector2(vecX, vecY), camera)
-      let intersections = raycaster.intersectObjects(
-        raycastableShapes as unknown as THREE.Object3D[])
+      let intersections = getIntersections(raycaster)
       expect(intersections.length).toBeGreaterThan(0)
 
       label3dHandler.onMouseMove(vecX, vecY, camera, intersections[0])
@@ -528,8 +539,7 @@ test('Rotate axis aligned 3d bbox around all axes', () => {
       }
 
       raycaster.setFromCamera(new THREE.Vector2(2 * vecX, 2 * vecY), camera)
-      intersections = raycaster.intersectObjects(
-        raycastableShapes as unknown as THREE.Object3D[])
+      intersections = getIntersections(raycaster)
       expect(intersections.length).toBeGreaterThan(0)
 
       label3dHandler.onMouseMove(2 * vecX, 2 * vecY, camera, intersections[0])

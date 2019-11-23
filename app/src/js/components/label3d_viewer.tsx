@@ -244,7 +244,7 @@ class Label3dViewer extends Viewer<Props> {
       // as readonly, but this should be readonly for all other purposes
       label3dList.raycastableShapes.slice() as unknown as THREE.Object3D[]
     )
-    const control = Session.label3dList.control
+    const control = label3dList.control
     const intersectsControl = control ?
       this._raycaster.intersectObjects(
         [control], false
