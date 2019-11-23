@@ -15,6 +15,15 @@ export class LinearInterpolationPolygonPolicy extends TrackPolicy {
   }
 
   /**
+   * Callback for when a label in the track is updated
+   */
+  public onLabelUpdated (
+
+  ) {
+    return 0
+  }
+
+  /**
    * Callback for label creation
    * @param itemIndex
    * @param label
