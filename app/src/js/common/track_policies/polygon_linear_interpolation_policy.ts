@@ -1,4 +1,8 @@
-import { Track } from '../track'
+import { addDuplicatedTrack } from '../../action/track'
+import { Polygon2D } from '../../drawable/2d/polygon2d'
+import { makeLabel } from '../../functional/states'
+import Session from '../session'
+import { Label, Track } from '../track'
 import * as types from '../types'
 import { TrackPolicy } from './track_policy'
 /**
@@ -8,5 +12,34 @@ export class LinearInterpolationPolygonPolicy extends TrackPolicy {
   constructor (track: Track) {
     super(track)
     this._policyType = types.TrackPolicyType.LINEAR_INTERPOLATION_POLYGON
+  }
+  /**
+   * Callback for label creation
+   * @param itemIndex
+   * @param label
+   * @param shapes
+   * @param shapeTypes
+   */
+  public onLabelCreated (
+    itemIndex: number,
+    label: Label,
+    sensors: number[]
+  ) {
+    const rect = ((label as Polygon2D).shapes[0]).toRect()
+    const labelObject = makeLabel({
+      type: types.LabelTypeName.POLYGON_2D,
+      category: label.category,
+      sensors
+    })
+
+    const state = Session.getState()
+    if (state.task.config.tracking) {
+      Session.dispatch(addDuplicatedTrack(
+        labelObject,
+        [types.ShapeTypeName.RECT],
+        [rect],
+        itemIndex
+      ))
+    }
   }
 }
