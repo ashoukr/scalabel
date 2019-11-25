@@ -90,7 +90,6 @@ export class Label3DHandler {
         this._mouseDownOnSelection = true
         // Set current label as selected label
         this.selectHighlighted()
-        this.highlight()
         return false
       }
     }
