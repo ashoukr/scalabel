@@ -790,23 +790,23 @@ export function splitPane (
     return state
   }
 
-  const firstChildId = state.user.layout.maxPaneId + 1
-  const secondChildId = state.user.layout.maxPaneId + 2
+  const child1Id = state.user.layout.maxPaneId + 1
+  const child2Id = state.user.layout.maxPaneId + 2
 
   const oldViewerConfig = state.user.viewerConfigs[action.viewerId]
   const newViewerConfig = _.cloneDeep(oldViewerConfig)
-  newViewerConfig.pane = secondChildId
+  newViewerConfig.pane = child2Id
   const newViewerConfigId = state.user.layout.maxViewerConfigId + 1
 
   const oldPane = state.user.layout.panes[action.pane]
-  const firstChild = makePane(
+  const child1 = makePane(
     oldPane.viewerId,
-    firstChildId,
+    child1Id,
     oldPane.id
   )
-  const secondChild = makePane(
+  const child2 = makePane(
     newViewerConfigId,
-    secondChildId,
+    child2Id,
     oldPane.id
   )
 
@@ -814,8 +814,8 @@ export function splitPane (
     viewerId: -1,
     split: action.split,
     primarySize: 50,
-    firstChild: firstChildId,
-    secondChild: secondChildId
+    child1: child1Id,
+    child2: child2Id
   })
 
   const newViewerConfigs = updateObject(
@@ -823,7 +823,7 @@ export function splitPane (
     {
       [action.viewerId]: updateObject(
         oldViewerConfig,
-        { pane: firstChildId }
+        { pane: child1Id }
       ),
       [newViewerConfigId]: newViewerConfig
     }
@@ -833,13 +833,13 @@ export function splitPane (
     state.user.layout,
     {
       maxViewerConfigId: newViewerConfigId,
-      maxPaneId: secondChildId,
+      maxPaneId: child2Id,
       panes: updateObject(
         state.user.layout.panes,
         {
           [newPane.id]: newPane,
-          [firstChildId]: firstChild,
-          [secondChildId]: secondChild
+          [child1Id]: child1,
+          [child2Id]: child2
         }
       )
     }
@@ -878,10 +878,10 @@ export function deletePane (
 
   // Get id of the child that is not the pane that will be deleted
   let newLeafId: number = -1
-  if (parent.firstChild === action.pane && parent.secondChild) {
-    newLeafId = parent.secondChild
-  } else if (parent.secondChild === action.pane && parent.firstChild) {
-    newLeafId = parent.firstChild
+  if (parent.child1 === action.pane && parent.child2) {
+    newLeafId = parent.child2
+  } else if (parent.child2 === action.pane && parent.child1) {
+    newLeafId = parent.child1
   } else {
     return state
   }
@@ -901,10 +901,10 @@ export function deletePane (
 
     // Flatten tree by removing old parent from the parent of the old parent and
     // replacing with the new leaf
-    if (parentId === newParent.firstChild) {
-      newParent = updateObject(newParent, { firstChild: newLeafId })
-    } else if (parentId === newParent.secondChild) {
-      newParent = updateObject(newParent, { secondChild: newLeafId })
+    if (parentId === newParent.child1) {
+      newParent = updateObject(newParent, { child1: newLeafId })
+    } else if (parentId === newParent.child2) {
+      newParent = updateObject(newParent, { child2: newLeafId })
     } else {
       return state
     }

@@ -291,8 +291,8 @@ export function makePane (
   primary?: 'first' | 'second',
   minPrimarySize?: number,
   maxPrimarySize?: number,
-  firstChild?: number,
-  secondChild?: number
+  child1?: number,
+  child2?: number
 ): PaneType {
   return {
     id: paneId,
@@ -303,8 +303,8 @@ export function makePane (
     split,
     minPrimarySize,
     maxPrimarySize,
-    firstChild,
-    secondChild
+    child1,
+    child2
   }
 }
 

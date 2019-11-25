@@ -295,9 +295,9 @@ export interface PaneType {
   /** Max size of primary pane */
   maxPrimarySize?: number
   /** Id of first child if not leaf */
-  firstChild?: number
+  child1?: number
   /** Id of second child if not leaf */
-  secondChild?: number
+  child2?: number
 }
 
 export interface LayoutType {

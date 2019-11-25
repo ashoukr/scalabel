@@ -39,10 +39,10 @@ class LabelPane extends Component<Props> {
     }
 
     if (
-      !pane.firstChild ||
-      !pane.secondChild ||
-      !(pane.firstChild in this.state.user.layout.panes) ||
-      !(pane.secondChild in this.state.user.layout.panes)
+      !pane.child1 ||
+      !pane.child2 ||
+      !(pane.child1 in this.state.user.layout.panes) ||
+      !(pane.child2 in this.state.user.layout.panes)
     ) {
       return null
     }
@@ -53,8 +53,8 @@ class LabelPane extends Component<Props> {
       throw new Error('Missing primary size')
     }
 
-    const firstChild = (<StyledLabelPane pane={pane.firstChild} />)
-    const secondChild = (<StyledLabelPane pane={pane.secondChild} />)
+    const child1 = (<StyledLabelPane pane={pane.child1} />)
+    const child2 = (<StyledLabelPane pane={pane.child2} />)
 
     return (
       <SplitPane
@@ -67,8 +67,8 @@ class LabelPane extends Component<Props> {
         allowResize
         resizerClassName={this.props.classes.resizer}
       >
-        {firstChild}
-        {secondChild}
+        {child1}
+        {child2}
       </SplitPane>
     )
   }
