@@ -121,7 +121,14 @@ export class Label3DList {
     const newRaycastableShapes: Array<Readonly<Shape3D>> = []
     const newRaycastMap: {[id: number]: Label3D} = {}
     const item = state.task.items[state.user.select.item]
-    const prevItemLength = this._selectedLabelGroup.children.length
+    const prevItemLabelIds = []
+    for (const cube of this._selectedLabelGroup.children) {
+      if (cube === this.control || cube === this._boundingBox) {
+        continue
+      }
+      const labelId = (cube as Shape3D).label.labelId
+      prevItemLabelIds.push(labelId)
+    }
 
     for (const key of Object.keys(this._labels)) {
       const id = Number(key)
@@ -176,14 +183,26 @@ export class Label3DList {
     const select = state.user.select
     if (select.item in select.labels) {
       const selectedLabelIds = select.labels[select.item]
+      // Group has changed if labels have changed
+      let groupChanged = false
+      if (prevItemLabelIds.length !== selectedLabelIds.length) {
+        groupChanged = true
+      } else {
+        for (const labelId of prevItemLabelIds) {
+          if (!(selectedLabelIds.includes(labelId))) {
+            groupChanged = true
+            break
+          }
+        }
+      }
       // Special behavior if there is only one label
       // axis align control, no bounding box
+      const groupMatrix = new THREE.Matrix4()
+      groupMatrix.copy(this._selectedLabelGroup.matrix)
+      this._selectedLabelGroup = new THREE.Group()
+      this.addLabelsToGroup(selectedLabelIds)
       if (selectedLabelIds.length === 1 &&
           selectedLabelIds[0] in this._labels) {
-        this._selectedLabelGroup = new THREE.Group()
-
-        this.addLabelsToGroup(selectedLabelIds)
-
         const cube = this._selectedLabelGroup.children[0]
         this._selectedLabelGroup.position.copy(cube.position)
         cube.position.sub(this._selectedLabelGroup.position)
@@ -191,62 +210,40 @@ export class Label3DList {
         const cubeQuaternion = new THREE.Quaternion().copy(cube.quaternion)
         this._selectedLabelGroup.applyQuaternion(cubeQuaternion)
         cube.applyQuaternion(cubeQuaternion.inverse())
-      } else {
-        // Group has changed if labels have changed
-        let groupChanged = false
-        if (prevItemLength - 2 !== selectedLabelIds.length) {
-          groupChanged = true
-        } else {
-          for (const cube of this._selectedLabelGroup.children) {
-            if (cube === this.control || cube === this._boundingBox) {
-              continue
-            }
-            const labelId = (cube as Shape3D).label.labelId
-            if (!(selectedLabelIds.includes(labelId))) {
-              groupChanged = true
-              break
-            }
-          }
-        }
+        this._selectedLabelGroup.scale.set(
+          cube.scale.x,
+          cube.scale.y,
+          cube.scale.z)
+        cube.scale.set(1,1,1)
+      } else if (groupChanged) {
         // Check if the group labels have changed
-        if (groupChanged) {
-          // Switch to rotation to ensure no group scaling
-          this.control.onKeyDown(new KeyboardEvent('keydown', { key: 'r' }))
-
-          this._selectedLabelGroup = new THREE.Group()
-          this.addLabelsToGroup(selectedLabelIds)
-
-          const bbox = new THREE.Box3().setFromObject(this._selectedLabelGroup)
-          bbox.getCenter(this._selectedLabelGroup.position)
-          for (const cube of this._selectedLabelGroup.children) {
-            cube.position.sub(this._selectedLabelGroup.position)
-          }
-
-          const geometry = new THREE.BoxBufferGeometry(
-            bbox.max.x - bbox.min.x,
-            bbox.max.y - bbox.min.y,
-            bbox.max.z - bbox.min.z)
-          const edges = new THREE.EdgesGeometry(geometry)
-          this._boundingBox = new THREE.LineSegments(edges,
-            new THREE.LineBasicMaterial({ color: PURPLE }))
-        } else {
-          const groupMatrix = new THREE.Matrix4()
-          groupMatrix.copy(this._selectedLabelGroup.matrix)
-          this._selectedLabelGroup = new THREE.Group()
-          this._selectedLabelGroup.applyMatrix(groupMatrix)
-          this.addLabelsToGroup(selectedLabelIds)
-          const groupMatrixInv = new THREE.Matrix4().getInverse(groupMatrix)
-          for (const cube of this._selectedLabelGroup.children) {
-            cube.applyMatrix(groupMatrixInv)
-          }
+        const bbox = new THREE.Box3().setFromObject(this._selectedLabelGroup)
+        bbox.getCenter(this._selectedLabelGroup.position)
+        for (const cube of this._selectedLabelGroup.children) {
+          cube.position.sub(this._selectedLabelGroup.position)
         }
-        this._selectedLabelGroup.add(this._boundingBox)
+        const geometry = new THREE.BoxBufferGeometry(
+          bbox.max.x - bbox.min.x,
+          bbox.max.y - bbox.min.y,
+          bbox.max.z - bbox.min.z)
+        const edges = new THREE.EdgesGeometry(geometry)
+        this._boundingBox = new THREE.LineSegments(edges,
+          new THREE.LineBasicMaterial({ color: PURPLE }))
+      } else {
+        this._selectedLabelGroup.applyMatrix(groupMatrix)
+        const groupMatrixInv = new THREE.Matrix4().getInverse(groupMatrix)
+        for (const cube of this._selectedLabelGroup.children) {
+          cube.applyMatrix(groupMatrixInv)
+        }
       }
+      this._selectedLabelGroup.add(this._boundingBox)
       this._selectedLabelGroup.add(this.control)
       this.control.attach(this._selectedLabelGroup)
+      this.control.validateController()
     } else {
       this._selectedLabelGroup = new THREE.Group()
       this._boundingBox = new THREE.LineSegments()
+      this.control.detach()
     }
     this._scene.add(this._selectedLabelGroup)
   }

@@ -85,18 +85,20 @@ export class Label3DHandler {
    */
   public onMouseDown (x: number, y: number, camera: THREE.Camera): boolean {
     if (this._highlightedLabel) {
-      const consumed = this._highlightedLabel.onMouseDown(x, y, camera)
-      if (consumed) {
-        this._mouseDownOnSelection = true
-        // Set current label as selected label
-        this.selectHighlighted()
-        return false
+      if (Session.label3dList.control.attached()) {
+        const consumed = this._highlightedLabel.onMouseDown(x, y, camera)
+        if (consumed) {
+          this._mouseDownOnSelection = true
+          // Set current label as selected label
+          this.selectHighlighted()
+          return false
+        }
       }
     }
 
     if (this._mouseOverGroupControl) {
-      this._mouseDownOnSelection = true
       if (Session.label3dList.control.attached()) {
+        this._mouseDownOnSelection = true
         const consumed = Session.label3dList.control.onMouseDown(camera)
         if (consumed) {
           return false
@@ -177,7 +179,7 @@ export class Label3DHandler {
           return true
         }
       }
-      if (labelList.selectedLabelGroup.children.length === 2) {
+      if (labelList.selectedLabelGroup.children.length <= 3) {
         for (const cube of labelList.selectedLabelGroup.children) {
           if (cube === labelList.control || cube === labelList.boundingBox) {
             continue

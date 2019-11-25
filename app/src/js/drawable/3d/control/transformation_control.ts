@@ -131,6 +131,22 @@ export class TransformationControl extends THREE.Group {
   }
 
   /**
+   * Enforce that current controller is valid
+   */
+  public validateController () {
+    if (!this._object) {
+      return true
+    } else if (this._object.children.length <= 3) {
+      return true
+    } else if (this._object.children.length >= 4 &&
+              this._currentController === this._scaleControl) {
+      this.switchController(this._rotationControl)
+      return false
+    }
+    return true
+  }
+
+  /**
    * Switch to new controller
    * @param controller
    */
