@@ -3,7 +3,6 @@ import * as React from 'react'
 import SplitPane from 'react-split-pane'
 import { updateAll } from '../action/common'
 import Session from '../common/session'
-import { PaneType } from '../functional/types'
 import { resizerStyles } from '../styles/split_pane'
 import { Component } from './component'
 import ViewerContainer, { viewerContainerReactKey } from './viewer_container'
@@ -13,9 +12,11 @@ interface ClassType {
   resizer: string
 }
 
-interface Props extends PaneType {
+interface Props {
   /** class names */
   classes: ClassType
+  /** pane id */
+  pane: number
 }
 
 /**
@@ -28,46 +29,40 @@ class LabelPane extends Component<Props> {
 
   /** Override render */
   public render () {
-    if (this.props.viewerId >= 0) {
+    const pane = this.state.user.layout.panes[this.props.pane]
+    if (pane.viewerId >= 0) {
       // Leaf, render viewer container
       return (<ViewerContainer
-        id={this.props.viewerId}
-        key={viewerContainerReactKey(this.props.viewerId)}
+        id={pane.viewerId}
+        key={viewerContainerReactKey(pane.viewerId)}
       />)
     }
 
     if (
-      !this.props.firstChild ||
-      !this.props.secondChild ||
-      !(this.props.firstChild in this.state.user.layout.panes) ||
-      !(this.props.secondChild in this.state.user.layout.panes)
+      !pane.firstChild ||
+      !pane.secondChild ||
+      !(pane.firstChild in this.state.user.layout.panes) ||
+      !(pane.secondChild in this.state.user.layout.panes)
     ) {
       return null
     }
-    if (!this.props.split) {
+    if (!pane.split) {
       throw new Error('Missing split type')
     }
-    if (!this.props.primarySize) {
+    if (!pane.primarySize) {
       throw new Error('Missing primary size')
     }
 
-    const firstPane = this.state.user.layout.panes[this.props.firstChild]
-    const secondPane = this.state.user.layout.panes[this.props.secondChild]
-
-    const firstChild = (<StyledLabelPane
-      {...firstPane}
-    />)
-    const secondChild = (<StyledLabelPane
-      {...secondPane}
-    />)
+    const firstChild = (<StyledLabelPane pane={pane.firstChild} />)
+    const secondChild = (<StyledLabelPane pane={pane.secondChild} />)
 
     return (
       <SplitPane
-        split={this.props.split}
-        minSize={`${this.props.minPrimarySize}%`}
-        maxSize={`${this.props.maxPrimarySize}%`}
-        size={`${this.props.primarySize}%`}
-        primary={this.props.primary}
+        split={pane.split}
+        minSize={`${pane.minPrimarySize}%`}
+        maxSize={`${pane.maxPrimarySize}%`}
+        size={`${pane.primarySize}%`}
+        primary={pane.primary}
         onChange={() => Session.dispatch(updateAll())}
         allowResize
         resizerClassName={this.props.classes.resizer}

@@ -5,8 +5,6 @@ import { withStyles } from '@material-ui/core/styles/index'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
 import Session from '../common/session'
-import { makePane } from '../functional/states'
-import { PaneType } from '../functional/types'
 import { LayoutStyles } from '../styles/label'
 import LabelPane from './label_pane'
 import PlayerControl from './player_control'
@@ -16,6 +14,8 @@ interface ClassType {
   titleBar: string
   /** everything below title bar */
   main: string
+  /** interface container */
+  interfaceContainer: string
 }
 
 interface Props {
@@ -62,16 +62,12 @@ class LabelLayout extends React.Component<Props, State> {
   /** The state of the layout */
   public layoutState: LayoutState
 
-  /** root pane */
-  private _rootPane: PaneType
-
   /**
    * @param {object} props
    */
   constructor (props: any) {
     super(props)
     this.layoutState = { left_size: 0, center_size: 0, right_size: 0 }
-    this._rootPane = makePane()
     Session.subscribe(this.onStateUpdated.bind(this))
   }
 
@@ -80,10 +76,6 @@ class LabelLayout extends React.Component<Props, State> {
    */
   public onStateUpdated () {
     this.setState(this.layoutState)
-    const state = Session.getState()
-    if (state.user.layout.rootPane in state.user.layout.panes) {
-      this._rootPane = state.user.layout.panes[state.user.layout.rootPane]
-    }
   }
 
   /**
@@ -180,16 +172,13 @@ class LabelLayout extends React.Component<Props, State> {
       num_frames={Session.getState().task.items.length}
     />)
 
+    const state = Session.getState()
+
     const labelInterface = (
-      <div
-        style={{
-          display: 'block', height: '100%',
-          position: 'absolute',
-          outline: 'none', width: '100%', background: '#222222'
-        }}
+      <div className={this.props.classes.interfaceContainer}
       >
         <LabelPane
-          {...this._rootPane} key={'rootPane'}
+          pane={state.user.layout.rootPane} key={'rootPane'}
         />
         { playerControl }
       </div >
