@@ -53,6 +53,11 @@ export interface PolygonType {
   points: PathPoint2DType []
 }
 
+export interface PolylineType {
+  /** array of control points */
+  points: PathPoint2DType []
+}
+
 export interface Vector2Type {
   /** The x-coordinate */
   x: number

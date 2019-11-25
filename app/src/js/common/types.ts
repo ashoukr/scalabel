@@ -37,7 +37,8 @@ export enum ShapeTypeName {
   GRID = 'grid',
   POINT_2D = 'point2d',
   PATH_POINT_2D = 'path_point2d',
-  POLYGON_2D = 'polygon2d'
+  POLYGON_2D = 'polygon2d',
+  POLYLINE_2D = 'polyline2d'
 }
 
 export enum DataType {

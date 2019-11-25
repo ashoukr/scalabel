@@ -10,6 +10,7 @@ import {
   Plane3DType,
   PointCloudViewerConfigType,
   PolygonType,
+  PolylineType,
   RectType,
   Select,
   SensorType,
@@ -77,6 +78,19 @@ export function makeRect (params: Partial<RectType> = {}): RectType {
  * @return {PolygonType}
  */
 export function makePolygon (params: Partial<PolygonType> = {}): PolygonType {
+  return {
+    points: [],
+    ...params
+  }
+}
+
+/**
+ * Initialize a polyline shape
+ * @param {{}} params
+ * @return {PolylineType}
+ */
+export function makePolyline
+  (params: Partial<PolylineType> = {}): PolylineType {
   return {
     points: [],
     ...params

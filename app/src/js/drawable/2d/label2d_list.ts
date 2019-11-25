@@ -7,6 +7,7 @@ import { Context2D } from '../util'
 import { Box2D } from './box2d'
 import { DrawMode, Label2D } from './label2d'
 import { Polygon2D } from './polygon2d'
+import { Polyline2D } from './polyline2d'
 import { Tag2D } from './tag2d'
 
 /**
@@ -21,6 +22,8 @@ export function makeDrawableLabel2D (labelType: string): Label2D | null {
       return new Tag2D()
     case LabelTypeName.POLYGON_2D:
       return new Polygon2D()
+    case LabelTypeName.POLYLINE_2D:
+      return new Polyline2D()
   }
   return null
 }
