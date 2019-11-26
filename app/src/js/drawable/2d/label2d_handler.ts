@@ -90,58 +90,13 @@ export class Label2DHandler {
   public onMouseUp (
       coord: Vector2D, _labelIndex: number, _handleIndex: number): void {
     if (!this.isSelectedLabelsEmpty() && !this.isKeyDown(Key.META)) {
-      for (const selectedLabel of Session.label2dList.selectedLabels) {
+      Session.label2dList.selectedLabels.forEach((selectedLabel, index) => {
         selectedLabel.onMouseUp(coord)
         if (selectedLabel !== this._highlightedLabel) {
           selectedLabel.setHighlighted(false)
         }
-        const valid = selectedLabel.isValid()
-        const editing = selectedLabel.editing
-        if (valid || editing) {
-          const [shapeIds, shapeTypes, shapeObjects] =
-            selectedLabel.shapeObjects()
-          if (valid) {
-            if (selectedLabel.labelId < 0) {
-            // Add new label to state
-              if (Session.tracking) {
-                const newTrack = new Track()
-                newTrack.updateState(
-                  makeTrack(-1),
-                  makeTrackPolicy(newTrack, Session.label2dList.policyType)
-                )
-                newTrack.onLabelCreated(
-                  this._selectedItemIndex, selectedLabel, [-1]
-                )
-              } else {
-                const label = selectedLabel.label
-                Session.dispatch(addLabel(
-                  this._selectedItemIndex, label, shapeTypes, shapeObjects
-                ))
-              }
-            } else {
-            // Update existing label
-              const label = selectedLabel.label
-              Session.dispatch(changeShapes(
-                this._selectedItemIndex, shapeIds, shapeObjects
-              ))
-              Session.dispatch(changeLabelProps(
-                this._selectedItemIndex, selectedLabel.labelId, { manual: true }
-              ))
-              if (Session.tracking && label.track in Session.tracks) {
-                Session.tracks[label.track].onLabelUpdated(
-                  this._selectedItemIndex,
-                  shapeObjects
-                )
-              }
-            }
-          }
-        } else {
-          Session.label2dList.labelList.splice(
-            Session.label2dList.labelList.length - 1,
-            1
-          )
-        }
-      }
+        this.commitLabel(index)
+      })
     }
   }
 
@@ -176,6 +131,60 @@ export class Label2DHandler {
   }
 
   /**
+   * commit selectedLabel
+   * @param index
+   */
+  public commitLabel (index: number): void {
+    const selectedLabel = Session.label2dList.selectedLabels[index]
+    const valid = selectedLabel.isValid()
+    const editing = selectedLabel.editing
+    if (valid || editing) {
+      const [shapeIds, shapeTypes, shapeObjects] =
+        selectedLabel.shapeObjects()
+      if (valid) {
+        if (selectedLabel.labelId < 0) {
+        // Add new label to state
+          if (Session.tracking) {
+            const newTrack = new Track()
+            newTrack.updateState(
+              makeTrack(-1),
+              makeTrackPolicy(newTrack, Session.label2dList.policyType)
+            )
+            newTrack.onLabelCreated(
+              this._selectedItemIndex, selectedLabel, [-1]
+            )
+          } else {
+            const label = selectedLabel.label
+            Session.dispatch(addLabel(
+              this._selectedItemIndex, label, shapeTypes, shapeObjects
+            ))
+          }
+        } else {
+        // Update existing label
+          const label = selectedLabel.label
+          Session.dispatch(changeShapes(
+            this._selectedItemIndex, shapeIds, shapeObjects
+          ))
+          Session.dispatch(changeLabelProps(
+            this._selectedItemIndex, selectedLabel.labelId, { manual: true }
+          ))
+          if (Session.tracking && label.track in Session.tracks) {
+            Session.tracks[label.track].onLabelUpdated(
+              this._selectedItemIndex,
+              shapeObjects
+            )
+          }
+        }
+      }
+    } else {
+      Session.label2dList.labelList.splice(
+        Session.label2dList.labelList.length - 1,
+        1
+      )
+    }
+  }
+
+  /**
    * Handle keyboard down events
    * @param e
    */
@@ -199,6 +208,10 @@ export class Label2DHandler {
       case Key.L_UP:
         // unlinking
         this.unlinkLabels()
+        break
+      case Key.ENTER:
+        // finish polyline
+        this.commitLabel(0)
         break
     }
   }

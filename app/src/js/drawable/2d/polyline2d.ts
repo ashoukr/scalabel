@@ -6,7 +6,7 @@ import { PathPoint2DType, PolylineType, ShapeType, State } from '../../functiona
 import { Size2D } from '../../math/size2d'
 import { Vector2D } from '../../math/vector2d'
 import { Context2D, encodeControlColor, getColorById, toCssColor } from '../util'
-import { DASH_LINE, MIN_SIZE, OPACITY } from './common'
+import { DASH_LINE, MIN_SIZE } from './common'
 import { DrawMode, Label2D } from './label2d'
 import { makeEdge2DStyle, makePathPoint2DStyle, PathPoint2D, PointType } from './path_point2d'
 
@@ -119,19 +119,17 @@ export class Polyline2D extends Label2D {
     if (self._state === Polyline2DState.DRAW) {
       const tmp = self._mouseCoord.clone().scale(ratio)
       context.lineTo(tmp.x, tmp.y)
-      context.lineTo(begin.x, begin.y)
-    } else {
-      context.lineTo(begin.x, begin.y)
     }
-    context.closePath()
+    // context.closePath()
     context.stroke()
+    context.restore()
 
-    if (mode === DrawMode.VIEW) {
-      const fillStyle = self._color.concat(OPACITY)
-      context.fillStyle = toCssColor(fillStyle)
-      context.fill()
-      context.restore()
-    }
+    // if (mode === DrawMode.VIEW) {
+    //   const fillStyle = self._color.concat(OPACITY)
+    //   context.fillStyle = toCssColor(fillStyle)
+    //   context.fill()
+    //   context.restore()
+    // }
 
     if (mode === DrawMode.CONTROL || self._selected || self._highlighted) {
       // for bezier curve
@@ -200,18 +198,16 @@ export class Polyline2D extends Label2D {
     // change corresponding midpoint
     if (point.type === PointType.VERTEX) {
       const numPoints = this._points.length
-      const nextPoint = this._points[this._highlightedHandle % numPoints]
-      const prevPoint = this._points[
-        (this._highlightedHandle + numPoints - 2) % numPoints]
-
-      if (prevPoint.type !== PointType.CURVE) {
-        const prevVertex = this._points[
-          (this._highlightedHandle + numPoints - 3) % numPoints]
+      const nextPoint = (this._highlightedHandle === numPoints) ?
+                        null : this._points[this._highlightedHandle]
+      const prevPoint = (this._highlightedHandle === 1) ?
+                        null : this._points[this._highlightedHandle - 2]
+      if (prevPoint && prevPoint.type !== PointType.CURVE) {
+        const prevVertex = this._points[this._highlightedHandle - 3]
         prevPoint.copy(this.getMidpoint(prevVertex, point))
       }
-      if (nextPoint.type !== PointType.CURVE) {
-        const nextVertex = this._points[
-          (this._highlightedHandle + 1) % numPoints]
+      if (nextPoint && nextPoint.type !== PointType.CURVE) {
+        const nextVertex = this._points[this._highlightedHandle + 1]
         nextPoint.copy(this.getMidpoint(point, nextVertex))
       }
     }
@@ -239,19 +235,11 @@ export class Polyline2D extends Label2D {
    * @param _coord
    * @param _limit
    */
-  public addVertex (coord: Vector2D): boolean {
-    let closed = false
+  public addVertex (coord: Vector2D): void {
     if (this._points.length === 0) {
       // First point for the polyline
       const newPoint = new PathPoint2D(coord.x, coord.y, PointType.VERTEX)
       this._points.push(newPoint)
-    } else if (this._highlightedHandle === 1) {
-      // When the polyline is closed, only add a new mid point
-      const point1 = this._points[0]
-      const point2 = this._points[this._points.length - 1]
-      const midPoint = this.getMidpoint(point1, point2)
-      this._points.push(midPoint)
-      closed = true
     } else {
       // add a new vertex and the new mid point on the new edge
       const point2 = this._points[this._points.length - 1]
@@ -259,7 +247,6 @@ export class Polyline2D extends Label2D {
       this._points.push(midPoint)
       this._points.push(new PathPoint2D(coord.x, coord.y, PointType.VERTEX))
     }
-    return closed
   }
 
   /**
@@ -280,7 +267,7 @@ export class Polyline2D extends Label2D {
             ++numVertices
           }
         }
-        if (numVertices < 4 || this._highlightedHandle <= 0 ||
+        if (numVertices < 3 || this._highlightedHandle <= 0 ||
           this._points[this._highlightedHandle - 1].type !== PointType.VERTEX) {
           return true
         }
@@ -400,7 +387,6 @@ export class Polyline2D extends Label2D {
   public lineToCurve (): void {
     const selectedLabelIndex = this._highlightedHandle - 1
     const point = this._points[selectedLabelIndex]
-    const numPoints = this._points.length
     const highlightedHandleIndex = this._highlightedHandle - 1
     switch (point.type) {
       case PointType.MID: // from midpoint to curve
@@ -417,8 +403,7 @@ export class Polyline2D extends Label2D {
       case PointType.CURVE: // from curve to midpoint
         const newMidPointIndex =
           (this._points[highlightedHandleIndex - 1].type === PointType.CURVE) ?
-            (highlightedHandleIndex - 1 + numPoints) % numPoints :
-            highlightedHandleIndex
+          highlightedHandleIndex - 1 : highlightedHandleIndex
         this._points.splice(highlightedHandleIndex, 1)
         this._points[newMidPointIndex].copy(this.getMidpoint(
           this._points[this.getNextIndex(newMidPointIndex)],
@@ -520,12 +505,7 @@ export class Polyline2D extends Label2D {
     if (this.editing === true &&
       this._state === Polyline2DState.DRAW) {
       // add vertex
-      const isClosed = this.addVertex(coord)
-      if (isClosed) {
-        // finish adding when it is closed
-        this._state = Polyline2DState.CLOSED
-        this.editing = false
-      }
+      this.addVertex(coord)
     } else if (this.editing === true &&
       this._state === Polyline2DState.RESHAPE) {
       // finish dragging point
@@ -553,9 +533,17 @@ export class Polyline2D extends Label2D {
    */
   public onKeyDown (e: string): boolean {
     this._keyDownMap[e] = true
-    if ((e === Key.D_UP || e === Key.D_LOW) &&
-      this._state === Polyline2DState.DRAW) {
-      return this.deleteVertex()
+    switch (e) {
+      case Key.D_UP:
+      case Key.D_LOW:
+        if (this._state === Polyline2DState.DRAW) {
+          return this.deleteVertex()
+        }
+        break
+      case Key.ENTER:
+        this._editing = false
+        this._state = Polyline2DState.CLOSED
+        break
     }
     return true
   }
@@ -642,10 +630,6 @@ export class Polyline2D extends Label2D {
               break
             }
           }
-        }
-        const tmp = this._points[this._points.length - 1]
-        if (tmp.type === PointType.VERTEX) {
-          this._points.push(this.getMidpoint(tmp, this._points[0]))
         }
         this._state = Polyline2DState.CLOSED
       }
@@ -784,7 +768,11 @@ export class Polyline2D extends Label2D {
    * @param index
    */
   private getPreviousIndex (index: number): number {
-    return (index - 1 + this._points.length) % this._points.length
+    if (index === 0) {
+      return -1
+    } else {
+      return index - 1
+    }
   }
 
   /**
@@ -792,6 +780,10 @@ export class Polyline2D extends Label2D {
    * @param index
    */
   private getNextIndex (index: number): number {
-    return (index + 1) % this._points.length
+    if (index === this._points.length - 1) {
+      return -1
+    } else {
+      return index + 1
+    }
   }
 }
